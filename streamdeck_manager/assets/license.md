@@ -1,0 +1,5 @@
+# License
+
+Free License usage from Flatico stickers. By freepic.
+
+See https://www.flaticon.com

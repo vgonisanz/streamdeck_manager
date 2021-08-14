@@ -1,0 +1,21 @@
+-r requirements.txt
+
+bandit
+black
+bump2version
+coverage
+cython
+pip-tools
+pycodestyle
+pylint
+pytest
+pytest-cov
+pytest-html
+radon
+recommonmark
+safety
+sphinx
+sphinx-markdown-tables
+sphinx-rtd-theme
+twine
+xenon
