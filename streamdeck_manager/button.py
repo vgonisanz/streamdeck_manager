@@ -108,6 +108,9 @@ class Button():
     def set_background(self, background):
         self._background = background
 
+    def set_key(self, key):
+        self._key = key
+
     @property
     def margins(self):
         return [self._top, self._right, self._bottom, self._left]

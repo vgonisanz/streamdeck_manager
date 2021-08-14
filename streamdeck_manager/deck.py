@@ -47,7 +47,8 @@ class Deck():
     def _key_change_callback(self, deck, key, state):
         logging.debug(f"Button callback in deck: {deck.id()} key: {key} state: {state}")
         if key in self._buttons:
-            self._buttons[key].key_change_callback(state)
+            if self._buttons[key] != None:
+                self._buttons[key].key_change_callback(state)
 
     def close(self):
         with self._deck:
@@ -68,6 +69,7 @@ class Deck():
         self._buttons[key].set_label(label)
         self._buttons[key].set_label_pressed(label_pressed)
         self._buttons[key].set_background(background)
+
         if icon != "":
             self._buttons[key].set_icon(os.path.join(self._asset_path, icon))
         if icon_pressed != "":
@@ -80,7 +82,8 @@ class Deck():
 
     def render(self):
         for button in self._buttons.values():
-            button.render()
+            if button != None:
+                button.render()
 
     def run(self):
         """
@@ -158,6 +161,10 @@ class Deck():
         return self.get_row_range(self.rows - 1)[-1]
     
     @property
+    def key_count(self):
+        return self._deck.key_count()
+
+    @property
     def rows(self):
         return self._deck.key_layout()[0]
     
@@ -220,6 +227,16 @@ class Deck():
             return None
         return self._buttons[key]
     
+    def set_button(self, key, button):
+        if not key in self._buttons:
+            logger.warning(f"Button {key} do not exist")
+            return None
+
+        if button != None:
+            button.set_key(key)
+
+        self._buttons[key] = button
+
     def set_background(self, photo_path, callback, render=True):
         # Approximate number of (non-visible) pixels between each key, so we can
         # take those into account when cutting up the image to show on the keys.

@@ -98,7 +98,6 @@ def main(device_id: int=0,
         set_last_button(deck)
         deck.render()
         deck.info()
-        deck.run()
 
     core.run()
 
