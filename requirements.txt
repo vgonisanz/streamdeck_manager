@@ -1,4 +1,16 @@
+click==7.1.2
+    # via typer
+coloredlogs==15.0.1
+    # via -r requirements.in
+humanfriendly==9.2
+    # via coloredlogs
 pillow==8.3.1
+    # via -r requirements.in
+pydantic==1.8.2
     # via -r requirements.in
 streamdeck==0.8.5
     # via -r requirements.in
+typer==0.3.2
+    # via -r requirements.in
+typing-extensions==3.10.0.0
+    # via pydantic

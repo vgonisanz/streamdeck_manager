@@ -2,6 +2,9 @@ import os
 import threading
 import logging
 
+from StreamDeck.ImageHelpers import PILHelper
+from PIL import Image, ImageDraw, ImageFont
+
 from streamdeck_manager.button import Button
 from streamdeck_manager.utils import (
     create_full_deck_sized_image,
@@ -21,15 +24,29 @@ class Deck():
         self._font = font
         self._deck = deck
 
+        # Font
+        self._font_size = 14
+        self._font = ImageFont.truetype(font, self._font_size)
+
+        # Image sizes
+        image = PILHelper.create_image(self._deck, background='black')  # tmp
+        self._image_width = image.width
+        self._image_height = image.height
+        self.autopadding_bottom()
+
+        # Margins
+        self._top = 0
+        self._right = 0
+        self._bottom = 20
+        self._left = 0
+
         self._deck.open()
         self._deck.reset()
         self._deck.set_brightness(30)
 
         self._buttons = dict()
         for key in range(deck.key_count()):
-            self._buttons[key] = Button(self._deck, key, name='',
-                                        font=self._font, label='',
-                                        label_pressed='', background='black')
+            self._buttons[key] = None
 
         self._deck.set_key_callback(self._key_change_callback)
 
@@ -48,42 +65,49 @@ class Deck():
         logging.debug(f"Button callback in deck: {deck.id()} key: {key} state: {state}")
         if key in self._buttons:
             if self._buttons[key] != None:
-                self._buttons[key].key_change_callback(state)
+                self._buttons[key].key_change_callback()
+                self._render_button(key, self._buttons[key], state)
 
     def close(self):
         with self._deck:
             logger.debug(f"Closing deck with index: {self.id}")
             self._deck.reset()
             self._deck.close()
-    
-    def update_button(self, key, name, label="", label_pressed="", icon="", icon_pressed="", background="black", render=True):
-        if key > self.last_key:
-            logger.warning(f"Key {key} is too high")
-            return
-        
-        if key < 0:
-            logger.warning(f"Key {key} is too low")
-            return
-
-        self._buttons[key].set_name(name)
-        self._buttons[key].set_label(label)
-        self._buttons[key].set_label_pressed(label_pressed)
-        self._buttons[key].set_background(background)
-
-        if icon != "":
-            self._buttons[key].set_icon(os.path.join(self._asset_path, icon))
-        if icon_pressed != "":
-            self._buttons[key].set_icon_pressed(os.path.join(self._asset_path, icon_pressed))
-        if render:
-            self._buttons[key].render()
 
     def reset(self):
         self._deck.reset()
 
+    
+    def _render_image(self, icon, label, x, y, background):
+        if icon:
+            image = PILHelper.create_scaled_image(self._deck, icon, margins=self.margins)
+        else:
+            image = PILHelper.create_image(self._deck, background=background)
+
+        draw = ImageDraw.Draw(image)
+        draw.text((x, y), text=label, font=self._font, anchor="ms", fill="white")
+
+        return PILHelper.to_native_format(self._deck, image)
+
+    def _render_button(self, key, button, state):
+        background = button.get_background()
+        if not state:
+            icon = button.get_icon()
+            label = button.get_label()
+        else:
+            icon = button.get_icon_pressed()
+            label = button.get_label_pressed()
+
+        image = self._render_image(icon, label, self._label_x, self._label_y, background)
+        self._deck.set_key_image(key, image)
+        
+
     def render(self):
-        for button in self._buttons.values():
+        for key, button in self._buttons.items():
+            state = False # TODO get states
             if button != None:
-                button.render()
+                self._render_button(key, button, state)  
+
 
     def run(self):
         """
@@ -193,6 +217,50 @@ class Deck():
         return self._deck.key_image_format()["rotation"]
 
     @property
+    def font_size(self):
+        return self._font_size
+    
+    def set_font_size(self, font_size):
+        self._font_size = font_size
+
+    @property
+    def margins(self):
+        return [self._top, self._right, self._bottom, self._left]
+    
+    def set_margins(self, top, right, bottom, left):
+        self._top = top
+        self._right = right
+        self._bottom = bottom
+        self._left = left
+
+    def autopadding_bottom(self):
+        """
+        Set padding with text in the botton automatically
+        """
+        self._label_x = self._image_width / 2
+        self._label_y = self._image_height - 5
+        self.set_margins(top=0, right=0, bottom=20, left=0)
+        return
+
+    def autopadding_top(self):
+        """
+        Set padding with text in the top automatically
+        """
+        self._label_x = self._image_width / 2
+        self._label_y = 15
+        self.set_margins(top=20, right=0, bottom=0, left=0)
+        return
+    
+    def autopadding_center(self):
+        """
+        Set padding with text in the center automatically
+        """
+        self._label_x = self._image_width / 2
+        self._label_y = self._image_height / 2
+        self.set_margins(top=0, right=0, bottom=0, left=0)
+        return
+
+    @property
     def range_buttons(self):
         """
         Return enumerator with all buttons
@@ -230,12 +298,13 @@ class Deck():
     def set_button(self, key, button):
         if not key in self._buttons:
             logger.warning(f"Button {key} do not exist")
-            return None
-
-        if button != None:
-            button.set_key(key)
+            return
 
         self._buttons[key] = button
+
+        if button:
+            button.set_key(key)
+
 
     def set_background(self, photo_path, callback, render=True):
         # Approximate number of (non-visible) pixels between each key, so we can
