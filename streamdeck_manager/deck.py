@@ -111,7 +111,9 @@ class Deck():
         states = self._deck.key_states()
         for key, button in self._buttons.items():
             state = states[key]
-            if button != None:
+            if button == None:
+                continue
+            if not button.hidden:
                 self._render_button(key, button, state)  
 
 
@@ -325,9 +327,13 @@ class Deck():
         key_images = dict()
         for key in range(self._deck.key_count()):
             key_images[key] = crop_key_image_from_deck_sized_image(self._deck, image, key_spacing, key)
-            button = Button()
+
+            # Use hidden button to have callback
+            button = Button(hidden=True)
             button.callback = callback
             self.set_button(key, button)
+
+            # Manual draw the images
             self._draw_image(key, key_images[key])
 
         self.autopadding_center()

@@ -12,6 +12,7 @@ class Button(pydantic.BaseModel):
     background: str = "black"
     icon: str = ""
     icon_pressed: str = ""
+    hidden: bool = False
     callback: typing.Callable = None
 
     def key_change_callback(self):

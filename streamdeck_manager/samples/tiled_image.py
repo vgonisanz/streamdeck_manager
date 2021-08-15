@@ -21,6 +21,7 @@ def main(asset_path: str=os.path.join(os.path.dirname(__file__), "..", "assets")
 
     for deck in core.decks:
         deck.set_background(photo_path=photo, callback=end_sample_callback)
+        deck.render()   # It is not needed, buttons are hidden, do not delete the image anymore
     
     core.run()
 
