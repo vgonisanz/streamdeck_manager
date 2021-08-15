@@ -103,8 +103,9 @@ class Deck():
         
 
     def render(self):
+        states = self._deck.key_states()
         for key, button in self._buttons.items():
-            state = False # TODO get states
+            state = states[key]
             if button != None:
                 self._render_button(key, button, state)  
 
