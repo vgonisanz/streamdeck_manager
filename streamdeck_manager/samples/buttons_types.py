@@ -2,6 +2,7 @@ import os
 import typer
 
 from streamdeck_manager.core import Core
+from streamdeck_manager.entities import Button
 
 
 def custom_callback():
@@ -12,71 +13,49 @@ def end_sample_callback():
     exit(0)
 
 
-def set_middle_row(deck):
+def set_middle_row(deck, asset_path):
     for key in deck.get_row_range(int(deck.rows/2)):
-        deck.update_button(
-            key=key,
-            name=f'key{key}', 
-            label=f'key{key}',
-            icon="plus.png"
+        button = Button(name=f"key{key}",
+            icon = os.path.join(asset_path, "plus.png"),
+            label=f"key{key}",
+            label_pressed="pressed"
         )
+        deck.set_button(key, button)
 
-def set_middle_col(deck):
+def set_middle_col(deck, asset_path):
     for key in deck.get_col_range(int(deck.cols/2)):
-        deck.update_button(
-            key=key,
-            name=f'key{key}', 
-            label=f'key{key}',
-            icon="minus.png"
+        button = Button(name=f"key{key}", 
+            label=f"key{key}",
+            label_pressed="pressed",
+            icon=os.path.join(asset_path, "minus.png")
         )
-        deck.get_button(key).autopadding_top()
+        #deck.get_button(key).autopadding_top() # TODO individual
+        deck.set_button(key, button)
 
 
 def set_corners(deck):
-    deck.update_button(
-        key=deck.top_left_key,
-        name='top_left_key', 
-        background="white"
-    )
-    deck.update_button(
-        key=deck.top_right_key,
-        name='top_right_key', 
-        background="red"
-    )
-    deck.update_button(
-        key=deck.bottom_left_key,
-        name='bottom_left_key', 
-        background="blue"
-    )
-    deck.update_button(
-        key=deck.bottom_right_key,
-        name='bottom_right_key', 
-        background="green"
-    )
+    deck.set_button(deck.top_left_key, Button(background="white"))
+    deck.set_button(deck.top_right_key, Button(background="red"))
+    deck.set_button(deck.bottom_left_key, Button(background="green"))
+    deck.set_button(deck.bottom_right_key, Button(background="blue"))
 
 
-def set_center_button(deck):
-    deck.update_button(
-        key=deck.center_key,
-        name='warning', 
-        label='warning',
-        icon="warning.png"
+def set_center_button(deck, asset_path):
+    button = Button(
+        icon=os.path.join(asset_path, "warning.png")
     )
-    button = deck.get_button(deck.center_key)
-    button.set_callback(custom_callback)
-    button.autopadding_center()
+    #deck.get_button(key).autopadding_center() # TODO individual
+    deck.set_button(deck.center_key, button)
 
 
-def set_last_button(deck):
-    deck.update_button(
-        key=deck.last_key,
-        name='exit', 
-        label='exit',
-        icon="stop.png"
+def set_last_button(deck, asset_path):
+    button = Button(
+        name="exit", 
+        label="exit",
+        icon=os.path.join(asset_path, "eject.png")
     )
-    button = deck.get_button(deck.last_key)
-    button.set_callback(end_sample_callback)
-    button.autopadding_center()
+    deck.set_button(deck.last_key, button)
+    #deck.get_button(key).autopadding_center() # TODO individual
 
 
 def main(device_id: int=0,
@@ -91,11 +70,11 @@ def main(device_id: int=0,
     core.initialize_deck(device_id, asset_path=asset_path, font=os.path.join(asset_path, "Roboto-Regular.ttf"))
 
     for deck in core.decks:
-        set_middle_row(deck)
-        set_middle_col(deck)
+        set_middle_row(deck, asset_path)
+        set_middle_col(deck, asset_path)
         set_corners(deck)
-        set_center_button(deck)
-        set_last_button(deck)
+        set_center_button(deck, asset_path)
+        set_last_button(deck, asset_path)
         deck.render()
         deck.info()
 
