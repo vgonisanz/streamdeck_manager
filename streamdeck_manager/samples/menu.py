@@ -3,7 +3,7 @@ import typer
 
 from streamdeck_manager.core import Core
 from streamdeck_manager.menu import Menu
-from streamdeck_manager.entities import Button
+from streamdeck_manager.entities import Button, Point2D
 
 
 def button_callback():
@@ -29,7 +29,8 @@ def main(device_id: int=0,
     for deck in core.decks:
         buttons = []
         for index in range(0, 30):
-            button = Button(label=f"nº: {index}", label_pressed='pressed', callback=button_callback)
+            button = Button(label=f"nº: {index}", label_pressed='pressed', callback=button_callback,
+                            label_margin=Point2D(x=deck.image_size[0]/2, y=deck.image_size[1]/2))
             buttons.append(button)
 
         menu = Menu(deck, back_icon_path=os.path.join(asset_path, "eject.png"),
