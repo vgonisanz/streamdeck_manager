@@ -45,8 +45,7 @@ class Deck():
         self._deck.set_brightness(30)
 
         self._buttons = dict()
-        for key in range(deck.key_count()):
-            self._buttons[key] = None
+        self.reset()
 
         self._deck.set_key_callback(self._key_change_callback)
 
@@ -65,7 +64,8 @@ class Deck():
         logging.debug(f"Button callback in deck: {deck.id()} key: {key} state: {state}")
         if key in self._buttons:
             if self._buttons[key] != None:
-                self._buttons[key].key_change_callback()
+                if state:
+                    self._buttons[key].key_change_callback()
                 self._render_button(key, self._buttons[key], state)
 
     def close(self):
@@ -75,7 +75,8 @@ class Deck():
             self._deck.close()
 
     def reset(self):
-        self._deck.reset()
+        for key in range(self._deck.key_count()):
+            self._buttons[key] = None
 
     def _draw_image(self, key, image):
         """
