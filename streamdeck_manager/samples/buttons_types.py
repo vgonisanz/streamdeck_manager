@@ -2,7 +2,7 @@ import os
 import typer
 
 from streamdeck_manager.core import Core
-from streamdeck_manager.entities import Button
+from streamdeck_manager.entities import Button, Margin
 
 
 def custom_callback():
@@ -18,7 +18,8 @@ def set_middle_row(deck, asset_path):
         button = Button(name=f"key{key}",
             icon = os.path.join(asset_path, "plus.png"),
             label=f"key{key}",
-            label_pressed="pressed"
+            label_pressed="pressed",
+            margin = Margin(top=0, right=0, bottom=20, left=0)
         )
         deck.set_button(key, button)
 
@@ -27,7 +28,8 @@ def set_middle_col(deck, asset_path):
         button = Button(name=f"key{key}", 
             label=f"key{key}",
             label_pressed="pressed",
-            icon=os.path.join(asset_path, "minus.png")
+            icon=os.path.join(asset_path, "minus.png"),
+            margin = Margin(top=20, right=0, bottom=0, left=0)
         )
         #deck.get_button(key).autopadding_top() # TODO individual
         deck.set_button(key, button)
@@ -78,7 +80,6 @@ def main(device_id: int=0,
         set_center_button(deck, asset_path)
         set_last_button(deck, asset_path)
         deck.render()
-        deck.info()
 
     core.run()
 

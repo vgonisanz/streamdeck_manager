@@ -24,28 +24,20 @@ class Deck():
         self._font = font
         self._deck = deck
 
-        # Font
-        self._font_size = 14
-        self._font = ImageFont.truetype(font, self._font_size)
-
-        # Image sizes
-        image = PILHelper.create_image(self._deck, background='black')  # tmp
-        self._image_width = image.width
-        self._image_height = image.height
-        self.autopadding_bottom()
-
-        # Margins
-        self._top = 0
-        self._right = 0
-        self._bottom = 20
-        self._left = 0
-
         self._deck.open()
         self._deck.reset()
         self._deck.set_brightness(30)
 
+        self._font_size = 14
+        self._font = ImageFont.truetype(font, self._font_size)
+
+        image = PILHelper.create_image(self._deck, background='black')  # tmp
+        self._image_width = image.width
+        self._image_height = image.height
+
         self._buttons = dict()
         self.reset()
+        self.autopadding_bottom()
 
         self._deck.set_key_callback(self._key_change_callback)
 
@@ -100,7 +92,7 @@ class Deck():
             image = PILHelper.create_image(self._deck, background=button.background)
         else:
             pre_image = Image.open(icon)
-            image = PILHelper.create_scaled_image(self._deck, pre_image, margins=self.margins)
+            image = PILHelper.create_scaled_image(self._deck, pre_image, margins=button.get_margins())
 
         image_with_text = ImageDraw.Draw(image)
         image_with_text.text((self._label_x, self._label_y), text=label, font=self._font, anchor="ms", fill="white")
@@ -231,16 +223,16 @@ class Deck():
     
     def set_font_size(self, font_size):
         self._font_size = font_size
-
-    @property
-    def margins(self):
-        return [self._top, self._right, self._bottom, self._left]
     
     def set_margins(self, top, right, bottom, left):
-        self._top = top
-        self._right = right
-        self._bottom = bottom
-        self._left = left
+        for _, button in self._buttons.items():
+            if not button:
+                continue
+
+            button.margin.top = top
+            button.margin.right = right
+            button.margin.bottom = bottom
+            button.margin.left = left
 
     def autopadding_bottom(self):
         """

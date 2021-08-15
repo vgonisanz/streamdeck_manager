@@ -49,6 +49,7 @@ def main(device_id: int=0,
     for deck in core.decks:
         set_buttons(deck, asset_path)
         set_exit_button(deck, asset_path)
+        deck.autopadding_bottom()
         deck.render()
     
     core.run()
