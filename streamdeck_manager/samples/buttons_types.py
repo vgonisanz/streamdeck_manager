@@ -6,7 +6,7 @@ from streamdeck_manager.entities import Button
 
 
 def custom_callback():
-    print("callback called!")
+    print("middle callback called!")
 
 
 def end_sample_callback():
@@ -42,7 +42,8 @@ def set_corners(deck):
 
 def set_center_button(deck, asset_path):
     button = Button(
-        icon=os.path.join(asset_path, "warning.png")
+        icon=os.path.join(asset_path, "warning.png"),
+        callback=custom_callback
     )
     #deck.get_button(key).autopadding_center() # TODO individual
     deck.set_button(deck.center_key, button)
@@ -52,7 +53,8 @@ def set_last_button(deck, asset_path):
     button = Button(
         name="exit", 
         label="exit",
-        icon=os.path.join(asset_path, "eject.png")
+        icon=os.path.join(asset_path, "eject.png"),
+        callback=end_sample_callback
     )
     deck.set_button(deck.last_key, button)
     #deck.get_button(key).autopadding_center() # TODO individual
