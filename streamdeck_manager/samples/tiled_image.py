@@ -20,8 +20,7 @@ def main(asset_path: str=os.path.join(os.path.dirname(__file__), "..", "assets")
         core.initialize_deck(index, asset_path=asset_path, font=os.path.join(asset_path, 'Roboto-Regular.ttf'))
 
     for deck in core.decks:
-        deck.set_background(photo_path=photo, callback=end_sample_callback, render=False)
-        deck.render()
+        deck.set_background(photo_path=photo, callback=end_sample_callback)
     
     core.run()
 

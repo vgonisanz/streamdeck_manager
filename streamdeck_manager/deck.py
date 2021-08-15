@@ -77,20 +77,17 @@ class Deck():
     def reset(self):
         self._deck.reset()
 
-    
-    def _render_image(self, icon, label, x, y, background):
-        if icon == '':
-            image = PILHelper.create_image(self._deck, background=background)
-        else:
-            pre_image = Image.open(icon)
-            image = PILHelper.create_scaled_image(self._deck, pre_image, margins=self.margins)
-
-        draw = ImageDraw.Draw(image)
-        draw.text((x, y), text=label, font=self._font, anchor="ms", fill="white")
-
-        return PILHelper.to_native_format(self._deck, image)
+    def _draw_image(self, key, image):
+        """
+        Create drawable from PIL Image and send to stream deck key framebuffer
+        """
+        drawable = PILHelper.to_native_format(self._deck, image)
+        self._deck.set_key_image(key, drawable)
 
     def _render_button(self, key, button, state):
+        """
+        Create image from file using PIL depending of the button status
+        """
         if not state:
             icon = button.icon
             label = button.label
@@ -98,8 +95,16 @@ class Deck():
             icon = button.icon_pressed
             label = button.label_pressed
 
-        image = self._render_image(icon, label, self._label_x, self._label_y, button.background)
-        self._deck.set_key_image(key, image)
+        if icon == '':
+            image = PILHelper.create_image(self._deck, background=button.background)
+        else:
+            pre_image = Image.open(icon)
+            image = PILHelper.create_scaled_image(self._deck, pre_image, margins=self.margins)
+
+        image_with_text = ImageDraw.Draw(image)
+        image_with_text.text((self._label_x, self._label_y), text=label, font=self._font, anchor="ms", fill="white")
+
+        self._draw_image(key, image)
         
 
     def render(self):
@@ -304,7 +309,11 @@ class Deck():
         self._buttons[key] = button
 
 
-    def set_background(self, photo_path, callback, render=True):
+    def set_background(self, photo_path, callback):
+        """
+        Set a image using all buttons and set up a callback. The image will be lost if
+        use function render.
+        """
         # Approximate number of (non-visible) pixels between each key, so we can
         # take those into account when cutting up the image to show on the keys.
         key_spacing = (36, 36)
@@ -314,13 +323,11 @@ class Deck():
         logging.info("Created full deck image size of {}x{} pixels.".format(image.width, image.height))
 
         key_images = dict()
-        for k in range(self._deck.key_count()):
-            key_images[k] = crop_key_image_from_deck_sized_image(self._deck, image, key_spacing, k)
-            button = self.get_button(k)
-            button.icon = key_images[k]
+        for key in range(self._deck.key_count()):
+            key_images[key] = crop_key_image_from_deck_sized_image(self._deck, image, key_spacing, key)
+            button = Button()
             button.callback = callback
+            self.set_button(key, button)
+            self._draw_image(key, key_images[key])
 
         self.autopadding_center()
-
-        if render:
-            self.render()
