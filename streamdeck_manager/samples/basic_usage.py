@@ -3,7 +3,7 @@ import logging
 import typer
 
 from streamdeck_manager.core import Core
-from streamdeck_manager.button import Button
+from streamdeck_manager.entities import Button
 
 
 def custom_callback():
@@ -19,19 +19,19 @@ def set_buttons(deck, asset_path):
         button = Button(name=f"key{key}", 
             label=f"key{key}",
             label_pressed="pressed")
-        button.set_icon(os.path.join(asset_path, "released.png"))
-        button.set_icon_pressed(os.path.join(asset_path, "pressed.png"))
-        button.set_callback(custom_callback)
+        button.icon = os.path.join(asset_path, "released.png")
+        button.icon_pressed = os.path.join(asset_path, "pressed.png")
+        button.callback = custom_callback
         deck.set_button(key, button)
 
 
 def set_exit_button(deck, asset_path):
     key = deck.last_key
-    button = Button(name=f"key{key}", 
-        label=f"key{key}",
-        label_pressed="pressed")
-    button.set_icon(os.path.join(asset_path, "stop.png"))
-    button.set_callback(end_sample_callback)
+    button = Button(name="quit", 
+        label=f"quit",
+        label_pressed="bye!")
+    button.icon = os.path.join(asset_path, "stop.png")
+    button.callback = end_sample_callback
     deck.set_button(deck.last_key, button)
 
 

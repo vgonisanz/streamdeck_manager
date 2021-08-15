@@ -5,7 +5,7 @@ import logging
 from StreamDeck.ImageHelpers import PILHelper
 from PIL import Image, ImageDraw, ImageFont
 
-from streamdeck_manager.button import Button
+from streamdeck_manager.entities import Button
 from streamdeck_manager.utils import (
     create_full_deck_sized_image,
     crop_key_image_from_deck_sized_image
@@ -79,10 +79,11 @@ class Deck():
 
     
     def _render_image(self, icon, label, x, y, background):
-        if icon:
-            image = PILHelper.create_scaled_image(self._deck, icon, margins=self.margins)
-        else:
+        if icon == '':
             image = PILHelper.create_image(self._deck, background=background)
+        else:
+            pre_image = Image.open(icon)
+            image = PILHelper.create_scaled_image(self._deck, pre_image, margins=self.margins)
 
         draw = ImageDraw.Draw(image)
         draw.text((x, y), text=label, font=self._font, anchor="ms", fill="white")
@@ -90,15 +91,14 @@ class Deck():
         return PILHelper.to_native_format(self._deck, image)
 
     def _render_button(self, key, button, state):
-        background = button.get_background()
         if not state:
-            icon = button.get_icon()
-            label = button.get_label()
+            icon = button.icon
+            label = button.label
         else:
-            icon = button.get_icon_pressed()
-            label = button.get_label_pressed()
+            icon = button.icon_pressed
+            label = button.label_pressed
 
-        image = self._render_image(icon, label, self._label_x, self._label_y, background)
+        image = self._render_image(icon, label, self._label_x, self._label_y, button.background)
         self._deck.set_key_image(key, image)
         
 
@@ -302,9 +302,6 @@ class Deck():
 
         self._buttons[key] = button
 
-        if button:
-            button.set_key(key)
-
 
     def set_background(self, photo_path, callback, render=True):
         # Approximate number of (non-visible) pixels between each key, so we can
@@ -319,9 +316,10 @@ class Deck():
         for k in range(self._deck.key_count()):
             key_images[k] = crop_key_image_from_deck_sized_image(self._deck, image, key_spacing, k)
             button = self.get_button(k)
-            button.set_icon_from_image(key_images[k])
-            button.set_callback(callback)
-            button.autopadding_center()
+            button.icon = key_images[k]
+            button.callback = callback
+
+        self.autopadding_center()
 
         if render:
             self.render()

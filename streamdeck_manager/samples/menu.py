@@ -3,7 +3,7 @@ import typer
 
 from streamdeck_manager.core import Core
 from streamdeck_manager.menu import Menu
-from streamdeck_manager.button import Button
+from streamdeck_manager.entities import Button
 
 
 def end_sample_callback():
