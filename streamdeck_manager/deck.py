@@ -95,7 +95,7 @@ class Deck():
             image = PILHelper.create_scaled_image(self._deck, pre_image, margins=button.get_margins())
 
         image_with_text = ImageDraw.Draw(image)
-        image_with_text.text((self._label_x, self._label_y), text=label, font=self._font, anchor="ms", fill="white")
+        image_with_text.text(button.get_label_margins(), text=label, font=self._font, anchor="ms", fill="white")
 
         self._draw_image(key, image)
         
@@ -234,12 +234,19 @@ class Deck():
             button.margin.bottom = bottom
             button.margin.left = left
 
+    def set_label_margins(self, x, y):
+        for _, button in self._buttons.items():
+            if not button:
+                continue
+
+            button.label_margin.x = x
+            button.label_margin.y = y
+
     def autopadding_bottom(self):
         """
         Set padding with text in the botton automatically
         """
-        self._label_x = self._image_width / 2
-        self._label_y = self._image_height - 5
+        self.set_label_margins(self._image_width / 2, self._image_height - 5)
         self.set_margins(top=0, right=0, bottom=20, left=0)
         return
 
@@ -247,8 +254,7 @@ class Deck():
         """
         Set padding with text in the top automatically
         """
-        self._label_x = self._image_width / 2
-        self._label_y = 15
+        self.set_label_margins(self._image_width / 2, 15)
         self.set_margins(top=20, right=0, bottom=0, left=0)
         return
     
@@ -256,8 +262,7 @@ class Deck():
         """
         Set padding with text in the center automatically
         """
-        self._label_x = self._image_width / 2
-        self._label_y = self._image_height / 2
+        self.set_label_margins(self._image_width / 2, self._image_height / 2)
         self.set_margins(top=0, right=0, bottom=0, left=0)
         return
 
