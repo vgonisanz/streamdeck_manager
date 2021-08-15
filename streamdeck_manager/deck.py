@@ -2,7 +2,10 @@ import os
 import threading
 import logging
 
-from streamdeck_manager.button import Button
+from StreamDeck.ImageHelpers import PILHelper
+from PIL import Image, ImageDraw, ImageFont
+
+from streamdeck_manager.entities import Button
 from streamdeck_manager.utils import (
     create_full_deck_sized_image,
     crop_key_image_from_deck_sized_image
@@ -25,11 +28,16 @@ class Deck():
         self._deck.reset()
         self._deck.set_brightness(30)
 
+        self._font_size = 14
+        self._font = ImageFont.truetype(font, self._font_size)
+
+        image = PILHelper.create_image(self._deck, background='black')  # tmp
+        self._image_width = image.width
+        self._image_height = image.height
+
         self._buttons = dict()
-        for key in range(deck.key_count()):
-            self._buttons[key] = Button(self._deck, key, name='',
-                                        font=self._font, label='',
-                                        label_pressed='', background='black')
+        self.reset()
+        self.autopadding_bottom()
 
         self._deck.set_key_callback(self._key_change_callback)
 
@@ -48,42 +56,59 @@ class Deck():
         logging.debug(f"Button callback in deck: {deck.id()} key: {key} state: {state}")
         if key in self._buttons:
             if self._buttons[key] != None:
-                self._buttons[key].key_change_callback(state)
+                if state:
+                    self._buttons[key].key_change_callback()
+                self._render_button(key, self._buttons[key], state)
 
     def close(self):
         with self._deck:
             logger.debug(f"Closing deck with index: {self.id}")
             self._deck.reset()
             self._deck.close()
-    
-    def update_button(self, key, name, label="", label_pressed="", icon="", icon_pressed="", background="black", render=True):
-        if key > self.last_key:
-            logger.warning(f"Key {key} is too high")
-            return
-        
-        if key < 0:
-            logger.warning(f"Key {key} is too low")
-            return
-
-        self._buttons[key].set_name(name)
-        self._buttons[key].set_label(label)
-        self._buttons[key].set_label_pressed(label_pressed)
-        self._buttons[key].set_background(background)
-
-        if icon != "":
-            self._buttons[key].set_icon(os.path.join(self._asset_path, icon))
-        if icon_pressed != "":
-            self._buttons[key].set_icon_pressed(os.path.join(self._asset_path, icon_pressed))
-        if render:
-            self._buttons[key].render()
 
     def reset(self):
-        self._deck.reset()
+        for key in range(self._deck.key_count()):
+            self._buttons[key] = None
+
+    def _draw_image(self, key, image):
+        """
+        Create drawable from PIL Image and send to stream deck key framebuffer
+        """
+        drawable = PILHelper.to_native_format(self._deck, image)
+        self._deck.set_key_image(key, drawable)
+
+    def _render_button(self, key, button, state):
+        """
+        Create image from file using PIL depending of the button status
+        """
+        if not state:
+            icon = button.icon
+            label = button.label
+        else:
+            icon = button.icon_pressed
+            label = button.label_pressed
+
+        if icon == '':
+            image = PILHelper.create_image(self._deck, background=button.background)
+        else:
+            pre_image = Image.open(icon)
+            image = PILHelper.create_scaled_image(self._deck, pre_image, margins=button.get_margins())
+
+        image_with_text = ImageDraw.Draw(image)
+        image_with_text.text(button.get_label_margins(), text=label, font=self._font, anchor="ms", fill="white")
+
+        self._draw_image(key, image)
+        
 
     def render(self):
-        for button in self._buttons.values():
-            if button != None:
-                button.render()
+        states = self._deck.key_states()
+        for key, button in self._buttons.items():
+            state = states[key]
+            if button == None:
+                continue
+            if not button.hidden:
+                self._render_button(key, button, state)  
+
 
     def run(self):
         """
@@ -193,6 +218,55 @@ class Deck():
         return self._deck.key_image_format()["rotation"]
 
     @property
+    def font_size(self):
+        return self._font_size
+    
+    def set_font_size(self, font_size):
+        self._font_size = font_size
+    
+    def set_margins(self, top, right, bottom, left):
+        for _, button in self._buttons.items():
+            if not button:
+                continue
+
+            button.margin.top = top
+            button.margin.right = right
+            button.margin.bottom = bottom
+            button.margin.left = left
+
+    def set_label_margins(self, x, y):
+        for _, button in self._buttons.items():
+            if not button:
+                continue
+
+            button.label_margin.x = x
+            button.label_margin.y = y
+
+    def autopadding_bottom(self):
+        """
+        Set padding with text in the botton automatically
+        """
+        self.set_label_margins(self._image_width / 2, self._image_height - 5)
+        self.set_margins(top=0, right=0, bottom=20, left=0)
+        return
+
+    def autopadding_top(self):
+        """
+        Set padding with text in the top automatically
+        """
+        self.set_label_margins(self._image_width / 2, 15)
+        self.set_margins(top=20, right=0, bottom=0, left=0)
+        return
+    
+    def autopadding_center(self):
+        """
+        Set padding with text in the center automatically
+        """
+        self.set_label_margins(self._image_width / 2, self._image_height / 2)
+        self.set_margins(top=0, right=0, bottom=0, left=0)
+        return
+
+    @property
     def range_buttons(self):
         """
         Return enumerator with all buttons
@@ -230,14 +304,16 @@ class Deck():
     def set_button(self, key, button):
         if not key in self._buttons:
             logger.warning(f"Button {key} do not exist")
-            return None
-
-        if button != None:
-            button.set_key(key)
+            return
 
         self._buttons[key] = button
 
-    def set_background(self, photo_path, callback, render=True):
+
+    def set_background(self, photo_path, callback):
+        """
+        Set a image using all buttons and set up a callback. The image will be lost if
+        use function render.
+        """
         # Approximate number of (non-visible) pixels between each key, so we can
         # take those into account when cutting up the image to show on the keys.
         key_spacing = (36, 36)
@@ -247,12 +323,15 @@ class Deck():
         logging.info("Created full deck image size of {}x{} pixels.".format(image.width, image.height))
 
         key_images = dict()
-        for k in range(self._deck.key_count()):
-            key_images[k] = crop_key_image_from_deck_sized_image(self._deck, image, key_spacing, k)
-            button = self.get_button(k)
-            button.set_icon_from_image(key_images[k])
-            button.set_callback(callback)
-            button.autopadding_center()
+        for key in range(self._deck.key_count()):
+            key_images[key] = crop_key_image_from_deck_sized_image(self._deck, image, key_spacing, key)
 
-        if render:
-            self.render()
+            # Use hidden button to have callback
+            button = Button(hidden=True)
+            button.callback = callback
+            self.set_button(key, button)
+
+            # Manual draw the images
+            self._draw_image(key, key_images[key])
+
+        self.autopadding_center()

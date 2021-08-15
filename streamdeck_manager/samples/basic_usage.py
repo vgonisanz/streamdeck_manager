@@ -3,6 +3,7 @@ import logging
 import typer
 
 from streamdeck_manager.core import Core
+from streamdeck_manager.entities import Button
 
 
 def custom_callback():
@@ -13,27 +14,25 @@ def end_sample_callback():
     exit(0)
 
 
-def set_buttons(deck):
+def set_buttons(deck, asset_path):
     for key in deck.range_buttons:
-        deck.update_button(
-            key=key,
-            name=f"key{key}", 
+        button = Button(name=f"key{key}", 
             label=f"key{key}",
-            label_pressed="pressed",
-            icon="released.png",
-            icon_pressed="pressed.png"
-        )
-        deck.get_button(key).set_callback(custom_callback)
+            label_pressed="pressed")
+        button.icon = os.path.join(asset_path, "released.png")
+        button.icon_pressed = os.path.join(asset_path, "pressed.png")
+        button.callback = custom_callback
+        deck.set_button(key, button)
 
-def set_exit_button(deck):
-    deck.update_button(
-        key=deck.last_key,
-        name="exit", 
-        label="exit",
-        label_pressed="bye",
-        icon="stop.png"
-    )
-    deck.get_button(deck.last_key).set_callback(end_sample_callback)
+
+def set_exit_button(deck, asset_path):
+    key = deck.last_key
+    button = Button(name="quit", 
+        label=f"quit",
+        label_pressed="bye!")
+    button.icon = os.path.join(asset_path, "stop.png")
+    button.callback = end_sample_callback
+    deck.set_button(deck.last_key, button)
 
 
 def main(device_id: int=0,
@@ -48,8 +47,9 @@ def main(device_id: int=0,
     core.initialize_deck(device_id, asset_path=asset_path, font=os.path.join(asset_path, "Roboto-Regular.ttf"))
 
     for deck in core.decks:
-        set_buttons(deck)
-        set_exit_button(deck)
+        set_buttons(deck, asset_path)
+        set_exit_button(deck, asset_path)
+        deck.autopadding_bottom()
         deck.render()
     
     core.run()

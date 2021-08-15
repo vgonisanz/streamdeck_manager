@@ -1,4 +1,5 @@
 typer
+pydantic
 streamdeck
 pillow
 coloredlogs
