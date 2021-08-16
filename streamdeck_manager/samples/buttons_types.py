@@ -20,7 +20,7 @@ def set_middle_row(deck, asset_path):
             label=f"key{key}",
             label_pressed="pressed",
             margin=Margin(top=0, right=0, bottom=20, left=0),
-            label_margin=Point2D(x=deck.image_size[0]/2, y=deck.image_size[1] - 5)
+            label_pos=Point2D(x=deck.image_size[0]/2, y=deck.image_size[1] - 5)
         )
         deck.set_button(key, button)
 
@@ -31,7 +31,7 @@ def set_middle_col(deck, asset_path):
             label_pressed="pressed",
             icon=os.path.join(asset_path, "minus.png"),
             margin=Margin(top=20, right=0, bottom=0, left=0),
-            label_margin=Point2D(x=deck.image_size[0]/2, y=15)
+            label_pos=Point2D(x=deck.image_size[0]/2, y=15)
         )
         deck.set_button(key, button)
 

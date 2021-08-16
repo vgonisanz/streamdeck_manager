@@ -5,7 +5,12 @@ import logging
 from StreamDeck.ImageHelpers import PILHelper
 from PIL import Image, ImageDraw, ImageFont
 
-from streamdeck_manager.entities import Button
+from streamdeck_manager.entities import (
+    Button,
+    Margin,
+    Point2D,
+    Size2D
+)
 from streamdeck_manager.utils import (
     create_full_deck_sized_image,
     crop_key_image_from_deck_sized_image
@@ -31,15 +36,13 @@ class Deck():
         self._font_size = 14
         self._font = ImageFont.truetype(font, self._font_size)
 
-        image = PILHelper.create_image(self._deck, background='black')  # tmp
-        self._image_width = image.width
-        self._image_height = image.height
+        self._image_size = Size2D(width=self.image_size[0], height=self.image_size[1])
 
         self._buttons = dict()
         self.reset()
         self.autopadding_bottom()
 
-        self._deck.set_key_callback(self._key_change_callback)
+        self._deck.set_key_callback(self._invoke_callback)
 
         logger.info(f"Opened {self.type} device with id {self.id})")
         return
@@ -52,12 +55,12 @@ class Deck():
             if t is threading.currentThread():
                 t.is_alive()
 
-    def _key_change_callback(self, deck, key, state):
+    def _invoke_callback(self, deck, key, state):
         logging.debug(f"Button callback in deck: {deck.id()} key: {key} state: {state}")
         if key in self._buttons:
             if self._buttons[key] != None:
                 if state:
-                    self._buttons[key].key_change_callback()
+                    self._buttons[key].invoke_callback()
                 self._render_button(key, self._buttons[key], state)
 
     def close(self):
@@ -92,10 +95,14 @@ class Deck():
             image = PILHelper.create_image(self._deck, background=button.background)
         else:
             pre_image = Image.open(icon)
-            image = PILHelper.create_scaled_image(self._deck, pre_image, margins=button.get_margins())
+            margin = button.margin
+            image = PILHelper.create_scaled_image(self._deck,
+                        pre_image,
+                        margins=[margin.top, margin.right, margin.bottom, margin.left])
 
         image_with_text = ImageDraw.Draw(image)
-        image_with_text.text(button.get_label_margins(), text=label, font=self._font, anchor="ms", fill="white")
+        label_positions = [button.label_pos.x, button.label_pos.y] 
+        image_with_text.text(label_positions, text=label, font=self._font, anchor="ms", fill="white")
 
         self._draw_image(key, image)
         
@@ -229,40 +236,36 @@ class Deck():
             if not button:
                 continue
 
-            button.margin.top = top
-            button.margin.right = right
-            button.margin.bottom = bottom
-            button.margin.left = left
+            button.margin = Margin(top=top, right=right, bottom=bottom, left=left)
 
-    def set_label_margins(self, x, y):
+    def set_label_pos(self, x, y):
         for _, button in self._buttons.items():
             if not button:
                 continue
 
-            button.label_margin.x = x
-            button.label_margin.y = y
+            button.label_pos = Point2D(x=x, y=y)
 
     def autopadding_bottom(self):
         """
-        Set padding with text in the botton automatically
+        Set padding with text in the botton automatically for all attached buttons
         """
-        self.set_label_margins(self._image_width / 2, self._image_height - 5)
+        self.set_label_pos(self._image_size.width / 2, self._image_size.height - 5)
         self.set_margins(top=0, right=0, bottom=20, left=0)
         return
 
     def autopadding_top(self):
         """
-        Set padding with text in the top automatically
+        Set padding with text in the top automatically for all attached buttons
         """
-        self.set_label_margins(self._image_width / 2, 15)
+        self.set_label_pos(self._image_size.width / 2, 15)
         self.set_margins(top=20, right=0, bottom=0, left=0)
         return
     
     def autopadding_center(self):
         """
-        Set padding with text in the center automatically
+        Set padding with text in the center automatically for all attached buttons
         """
-        self.set_label_margins(self._image_width / 2, self._image_height / 2)
+        self.set_label_pos(self._image_size.width / 2, self._image_size.height / 2)
         self.set_margins(top=0, right=0, bottom=0, left=0)
         return
 

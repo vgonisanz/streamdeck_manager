@@ -30,7 +30,7 @@ def main(device_id: int=0,
         buttons = []
         for index in range(0, 30):
             button = Button(label=f"nº: {index}", label_pressed='pressed', callback=button_callback,
-                            label_margin=Point2D(x=deck.image_size[0]/2, y=deck.image_size[1]/2))
+                            label_pos=Point2D(x=deck.image_size[0]/2, y=deck.image_size[1]/2))
             buttons.append(button)
 
         menu = Menu(deck, back_icon_path=os.path.join(asset_path, "eject.png"),

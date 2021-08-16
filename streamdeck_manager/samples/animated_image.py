@@ -57,7 +57,7 @@ def create_animation_frames(deck, image_filename):
 
 
 # Closes the StreamDeck device on key state change.
-def key_change_callback(deck, key, state):
+def invoke_callback(deck, key, state):
     # Use a scoped-with on the deck to ensure we're the only thread using it
     # right now.
     with deck:
@@ -155,7 +155,7 @@ if __name__ == "__main__":
         threading.Thread(target=animate, args=[FRAMES_PER_SECOND]).start()
 
         # Register callback function for when a key state changes.
-        deck.set_key_callback(key_change_callback)
+        deck.set_key_callback(invoke_callback)
 
         # Wait until all application threads have terminated (for this example,
         # this is when all deck handles are closed).
