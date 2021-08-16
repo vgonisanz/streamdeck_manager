@@ -44,6 +44,9 @@ class Deck():
 
         self._deck.set_key_callback(self._invoke_callback)
 
+        #self._lock = threading.Lock()
+        #self._lock.acquire(blocking=False)
+
         logger.info(f"Opened {self.type} device with id {self.id})")
         return
     
@@ -116,20 +119,6 @@ class Deck():
             if not button.hidden:
                 self._render_button(key, button, state)  
 
-
-    def run(self):
-        """
-        Wait until all application threads have terminated (for this example,
-        this is when all deck handles are closed).
-        """
-        logger.debug(f"Running deck {self.id}")
-
-        for t in threading.enumerate():
-            if t is threading.currentThread():
-                continue
-
-            if t.is_alive():
-                t.join()
     
     def info(self):
         flip_description = {
@@ -338,3 +327,17 @@ class Deck():
             self._draw_image(key, key_images[key])
 
         self.autopadding_center()
+
+    def run(self):
+        """
+        Wait until all application threads have terminated (for this example,
+        this is when all deck handles are closed).
+        """
+        logger.debug(f"Running deck {self.id}")
+
+        for t in threading.enumerate():
+            if t is threading.currentThread():
+                continue
+
+            if t.is_alive():
+                t.join()

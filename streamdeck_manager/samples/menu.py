@@ -38,11 +38,14 @@ def main(device_id: int=0,
                     previous_icon_path=os.path.join(asset_path, "back.png")
         )
         menu.set_buttons(buttons)
-        menu.set_back_callback(end_sample_callback)
-        menu.update()
+        #menu.set_back_callback(end_sample_callback)
+        #menu._update()
+        #menu.run()
+        menu.wait()
+        print("no wait")
 
     # TODO button.autopadding_center()
-    core.run()
+    #core.run()
 
 
 if __name__ == "__main__":
