@@ -247,7 +247,7 @@ class Deck():
 
     def autopadding_bottom(self):
         """
-        Set padding with text in the botton automatically
+        Set padding with text in the botton automatically for all attached buttons
         """
         self.set_label_pos(self._image_size.width / 2, self._image_size.height - 5)
         self.set_margins(top=0, right=0, bottom=20, left=0)
@@ -255,7 +255,7 @@ class Deck():
 
     def autopadding_top(self):
         """
-        Set padding with text in the top automatically
+        Set padding with text in the top automatically for all attached buttons
         """
         self.set_label_pos(self._image_size.width / 2, 15)
         self.set_margins(top=20, right=0, bottom=0, left=0)
@@ -263,7 +263,7 @@ class Deck():
     
     def autopadding_center(self):
         """
-        Set padding with text in the center automatically
+        Set padding with text in the center automatically for all attached buttons
         """
         self.set_label_pos(self._image_size.width / 2, self._image_size.height / 2)
         self.set_margins(top=0, right=0, bottom=0, left=0)
