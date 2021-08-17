@@ -2,16 +2,12 @@ import os
 import typer
 
 from streamdeck_manager.core import Core
-from streamdeck_manager.menu import Menu
+from streamdeck_manager.fsm.menu import Menu
 from streamdeck_manager.entities import Button, Point2D
 
 
 def button_callback():
     print("Button pushed")
-
-
-def end_sample_callback():
-    exit(0)
 
 
 def main(device_id: int=0,
@@ -38,10 +34,8 @@ def main(device_id: int=0,
                     previous_icon_path=os.path.join(asset_path, "back.png")
         )
         menu.set_buttons(buttons)
-        #menu.set_back_callback(end_sample_callback)
-        #menu._update()
-        #menu.run()
         menu.wait()
+        #menu.run()
         print("no wait")
 
     # TODO button.autopadding_center()

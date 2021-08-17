@@ -3,8 +3,8 @@ import logging
 
 import transitions
 
-from streamdeck_manager.entities import Button
 from streamdeck_manager.fsm.base import FSMBase
+from streamdeck_manager.entities import Button
 
 
 logger = logging.getLogger(__name__) 
@@ -12,12 +12,8 @@ logger = logging.getLogger(__name__)
 class Menu(FSMBase):
 
     def __init__(self, deck, back_icon_path, next_icon_path, previous_icon_path):
-        super().__init__()
-
-        states = [ 
-            "in_page_current",
-        ]
-        self._append_states(states)
+        self._set_up_fsm()
+        
         self._deck = deck
         self._label_back = "back"
         self._label_next = "next"
@@ -28,16 +24,15 @@ class Menu(FSMBase):
         self._buttons = []
         self._current_page = 0
         self._menu_button_index = self._deck.get_col_range(self._deck.cols - 1)[-3:]
-        
-        self._create_fsm(initial='in_page_current', before=self._update)
-        self._create_transitions()
         self._create_menu_buttons()
 
-
-    def _create_transitions(self):
-        """
-        Set end and use case transitions 
-        """
+    def _set_up_fsm(self):
+        super().__init__()
+        states = [ 
+            "in_page_current",
+        ]
+        self._append_states(states)
+        self._create_fsm(model=self, initial="in_page_current", before=None, after=self._update)
         self._machine.add_transition(
             trigger='press_back',
             source='in_page_current',

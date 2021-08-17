@@ -27,15 +27,16 @@ class FSMBase():
     def _append_states(self, states):
         self._states += states
     
-    def _create_fsm(self, initial, before=None, after=None):
+    def _create_fsm(self, model, initial, before=None, after=None):
         """
         Create a Finite state machine to use case
         with start transition only when trigger run.
         Users can define any name except start and
         end. And must provide a valid initial value.
         """
+        self._model = model
         self._machine = transitions.Machine(
-            model=self,
+            model=model,
             states=self._states,
             initial='start'
         )
