@@ -8,8 +8,8 @@ from StreamDeck.DeviceManager import DeviceManager
 logger = logging.getLogger(__name__) 
 
 class Core():
-    def __init__(self, log_level=logging.DEBUG):
-        self._initialize_logs(log_level)
+    def __init__(self, log_level=logging.DEBUG, log_level_transitions=logging.ERROR):
+        self._initialize_logs(log_level, log_level_transitions)
 
         self._cleanup_done = False
         self._streamdecks = DeviceManager().enumerate()
@@ -21,9 +21,10 @@ class Core():
         if not self._cleanup_done:
             self.terminate()
 
-    def _initialize_logs(self, log_level):
+    def _initialize_logs(self, log_level, log_level_transitions):
         coloredlogs.install(level=log_level)
         logging.getLogger("PIL.PngImagePlugin").setLevel(logging.INFO)
+        logging.getLogger("transitions").setLevel(log_level_transitions)
 
     def initialize_deck(self, index, asset_path, font):
         if index > len(self.streamdecks):
