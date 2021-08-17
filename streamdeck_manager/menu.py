@@ -1,23 +1,23 @@
-import os
 import threading
 import logging
 
 import transitions
 
 from streamdeck_manager.entities import Button
+from streamdeck_manager.fsm.base import FSMBase
+
 
 logger = logging.getLogger(__name__) 
 
-class Menu():
-    states = [ 
-            "start",
-            "in_page_current",
-            "end"
-        ]
+class Menu(FSMBase):
 
     def __init__(self, deck, back_icon_path, next_icon_path, previous_icon_path):
-        self._lock = threading.Lock()
-        self._lock.acquire(blocking=False)
+        super().__init__()
+
+        states = [ 
+            "in_page_current",
+        ]
+        self._append_states(states)
         self._deck = deck
         self._label_back = "back"
         self._label_next = "next"
@@ -29,28 +29,20 @@ class Menu():
         self._current_page = 0
         self._menu_button_index = self._deck.get_col_range(self._deck.cols - 1)[-3:]
         
-        self._create_fsm()
+        self._create_fsm(initial='in_page_current', before=self._update)
+        self._create_transitions()
         self._create_menu_buttons()
 
-    def _create_fsm(self):
+
+    def _create_transitions(self):
         """
-        Create a Finite state machine to use case
+        Set end and use case transitions 
         """
-        self._machine = transitions.Machine(
-            model=self,
-            states=Menu.states,
-            initial='start'
-        )
-        self._machine.add_transition(
-            trigger='run',
-            source='start',
-            dest='in_page_current',
-            after=self._update
-        )
         self._machine.add_transition(
             trigger='press_back',
             source='in_page_current',
             dest='end',
+            before=self._reset_elements,
             after=self._release
         )
         self._machine.add_transition(
@@ -58,15 +50,16 @@ class Menu():
             source='in_page_current',
             dest='in_page_current',
             conditions=[self._next_page],
-            after=self._update
+            before=self._update
         )
         self._machine.add_transition(
             trigger='press_prev',
             source='in_page_current',
             dest='in_page_current',
             conditions=[self._prev_page],
-            after=self._update
+            before=self._update
         )
+
     def _create_menu_buttons(self):
         self._deck.set_button(self._menu_button_index[0],
                               Button(name=self._label_back,
@@ -86,7 +79,6 @@ class Menu():
                                      icon=self._icon_prev,
                                      callback = self.press_prev)
         )
-
 
     def _next_page(self):
         """
@@ -148,13 +140,3 @@ class Menu():
         self._reset_elements()
         self._update_buttons()
         self._deck.render()
-    
-    def wait(self):
-        self.run()
-        self._lock.acquire(blocking=True)
-    
-    def _release(self):
-        self._reset_elements()
-        self._lock.release()
-        print("released")
-
