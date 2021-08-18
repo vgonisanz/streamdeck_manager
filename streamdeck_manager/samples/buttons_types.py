@@ -14,7 +14,7 @@ def end_sample_callback():
 
 
 def set_middle_row(deck, asset_path):
-    for key in deck.get_row_range(int(deck.rows/2)):
+    for key in deck.panel.get_row_range(int(deck.panel.rows/2)):
         button = Button(name=f"key{key}",
             icon = os.path.join(asset_path, "plus.png"),
             label=f"key{key}",
@@ -22,10 +22,10 @@ def set_middle_row(deck, asset_path):
             margin=Margin(top=0, right=0, bottom=20, left=0),
             label_pos=Point2D(x=deck.image_size[0]/2, y=deck.image_size[1] - 5)
         )
-        deck.set_button(key, button)
+        deck.panel.set_button(key, button)
 
 def set_middle_col(deck, asset_path):
-    for key in deck.get_col_range(int(deck.cols/2)):
+    for key in deck.panel.get_col_range(int(deck.panel.cols/2)):
         button = Button(name=f"key{key}", 
             label=f"key{key}",
             label_pressed="pressed",
@@ -33,14 +33,14 @@ def set_middle_col(deck, asset_path):
             margin=Margin(top=20, right=0, bottom=0, left=0),
             label_pos=Point2D(x=deck.image_size[0]/2, y=15)
         )
-        deck.set_button(key, button)
+        deck.panel.set_button(key, button)
 
 
 def set_corners(deck):
-    deck.set_button(deck.top_left_key, Button(background="white"))
-    deck.set_button(deck.top_right_key, Button(background="red"))
-    deck.set_button(deck.bottom_left_key, Button(background="green"))
-    deck.set_button(deck.bottom_right_key, Button(background="blue"))
+    deck.panel.set_button(deck.panel.top_left_key, Button(background="white"))
+    deck.panel.set_button(deck.panel.top_right_key, Button(background="red"))
+    deck.panel.set_button(deck.panel.bottom_left_key, Button(background="green"))
+    deck.panel.set_button(deck.panel.bottom_right_key, Button(background="blue"))
 
 
 def set_center_button(deck, asset_path):
@@ -49,7 +49,7 @@ def set_center_button(deck, asset_path):
         icon_pressed=os.path.join(asset_path, "warning.png"),
         callback=custom_callback
     )
-    deck.set_button(deck.center_key, button)
+    deck.panel.set_button(deck.panel.center_key, button)
 
 
 def set_last_button(deck, asset_path):
@@ -59,7 +59,7 @@ def set_last_button(deck, asset_path):
         icon=os.path.join(asset_path, "eject.png"),
         callback=end_sample_callback
     )
-    deck.set_button(deck.last_key, button)
+    deck.panel.set_button(deck.panel.last_key, button)
 
 
 def main(device_id: int=0,
