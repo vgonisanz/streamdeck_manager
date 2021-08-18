@@ -1,3 +1,6 @@
+"""
+Print in stdout info about all stream connected
+"""
 import os
 import typer
 
@@ -9,15 +12,13 @@ def main(asset_path: str=os.path.join(os.path.dirname(__file__), "..", "assets")
 
     if len(core.streamdecks) <= 0:
         print("Not Stream deck found")
-        raise typer.Exit()
+        raise typer.Exit(1)
 
     for index in core.device_ids:
         core.initialize_deck(index, asset_path=asset_path, font=os.path.join(asset_path, 'Roboto-Regular.ttf'))
 
     for deck in core.decks:
         deck.info()
-    
-    core.terminate()    # Manual terminate, its optional because auto terminate if not done manually
 
 
 if __name__ == "__main__":
