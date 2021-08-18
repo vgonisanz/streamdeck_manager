@@ -180,6 +180,10 @@ class Deck():
     def font_size(self):
         return self._font_size
     
+    @property
+    def panel(self):
+        return self._panel
+
     def set_font_size(self, font_size):
         self._font_size = font_size
 

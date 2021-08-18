@@ -40,19 +40,17 @@ class Panel():
         return self._cols
 
     def get_button(self, key):
-        buttons = self._panel.get_buttons()
-        if not key in buttons:
+        if not key in self._buttons:
             logger.warning(f"Button {key} do not exist")
             return None
-        return buttons[key]
+        return self._buttons[key]
     
     def set_button(self, key, button):
-        buttons = self._panel.get_buttons()
-        if not key in buttons:
+        if not key in self._buttons:
             logger.warning(f"Button {key} do not exist")
             return
 
-        buttons[key] = button
+        self._buttons[key] = button
 
     def get_buttons(self):
         return self._buttons

@@ -15,24 +15,23 @@ def end_sample_callback():
 
 
 def set_buttons(deck, asset_path):
-    for key in deck.range_buttons:
+    for key in deck.panel.range_buttons:
         button = Button(name=f"key{key}", 
             label=f"key{key}",
             label_pressed="pressed")
         button.icon = os.path.join(asset_path, "released.png")
         button.icon_pressed = os.path.join(asset_path, "pressed.png")
         button.callback = custom_callback
-        deck.set_button(key, button)
+        deck.panel.set_button(key, button)
 
 
 def set_exit_button(deck, asset_path):
-    key = deck.last_key
     button = Button(name="quit", 
         label=f"quit",
         label_pressed="bye!")
     button.icon = os.path.join(asset_path, "stop.png")
     button.callback = end_sample_callback
-    deck.set_button(deck.last_key, button)
+    deck.panel.set_button(deck.panel.last_key, button)
 
 
 def main(device_id: int=0,
@@ -49,7 +48,7 @@ def main(device_id: int=0,
     for deck in core.decks:
         set_buttons(deck, asset_path)
         set_exit_button(deck, asset_path)
-        deck.autopadding_bottom()
+        deck.panel.autopadding_bottom()
         deck.render()
     
     core.run()
