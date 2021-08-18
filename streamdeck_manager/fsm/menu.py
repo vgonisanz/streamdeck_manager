@@ -10,7 +10,12 @@ from streamdeck_manager.entities import Button
 logger = logging.getLogger(__name__) 
 
 class Menu(FSMBase):
-
+    """
+    Menu is a finite state machine to manage automatically a list of
+    buttons. This class update the panel automatically and provide a navigation
+    FSM using its buttons. The back button set the FSM to the end
+    state and release the control with a thread called wait function.
+    """
     def __init__(self, deck, back_icon_path, next_icon_path, previous_icon_path):
         self._set_up_fsm()
         
@@ -113,7 +118,6 @@ class Menu(FSMBase):
             self._deck.panel.set_button(k, self._buttons[current_index])
             element_index_in_page += 1
 
-
     def _reset_elements(self):
         """
         Set black buttons in page
@@ -121,11 +125,6 @@ class Menu(FSMBase):
         for k in range(self._deck.panel.key_count):
             if not k in self._menu_button_index:
                 self._deck.panel.set_button(k, Button(background="black"))
-
-
-    # def set_back_callback(self, callback):
-    #     back_button = self._deck.get_button(self._menu_button_index[0])
-    #     back_button.callback = callback
 
     def set_buttons(self, buttons):
         self._current_page = 0

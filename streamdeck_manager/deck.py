@@ -53,7 +53,7 @@ class Deck():
     
     def __del__(self):
         """
-        Avoid error when kill with a signal
+        Avoid error when kill with a signal. TBR
         """
         for t in threading.enumerate():
             if t is threading.currentThread():

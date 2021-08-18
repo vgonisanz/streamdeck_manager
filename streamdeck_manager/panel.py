@@ -12,7 +12,9 @@ logger = logging.getLogger(__name__)
 class Panel():
     """
     Panel contain the buttons that fit in a deck and provide
-    easy ways to find keys. TBD
+    easy ways to find keys. Each deck have a unique panel
+    where you can change the buttons and its callbacks
+    to manage them.
     """
     def __init__(self, rows, cols, key_count, image_size):
         self._rows = rows
