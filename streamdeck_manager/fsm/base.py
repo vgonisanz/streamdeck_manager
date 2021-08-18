@@ -18,9 +18,11 @@ class FSMBase():
     - reset: Trigger function to reset the FSM.
     - run: Trigger function to start running the FSM.
     - end: State used to cleanup the FSM.
+    - exit: Trigger function returnable to fore end the FSM.
 
     The machine created with this class can be used in
     two ways:
+
     - calling wait method: Run the machine and free
     in end state with a transition.
     - calling run method: Run the machine and let execution 
@@ -58,6 +60,12 @@ class FSMBase():
             trigger='reset',
             source='*',
             dest='start'
+        )
+        self._machine.add_transition(
+            trigger='exit',
+            source='*',
+            dest='end',
+            after=self._release
         )
     
     def wait(self):

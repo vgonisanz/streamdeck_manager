@@ -185,8 +185,6 @@ class Deck():
     def set_font_size(self, font_size):
         self._font_size = font_size
 
-    def get_panel(self):
-        return self._panel
 
     def set_background(self, photo_path, callback):
         """
