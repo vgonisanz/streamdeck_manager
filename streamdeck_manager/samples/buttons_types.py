@@ -1,3 +1,10 @@
+"""
+Several buttons and alignement using panel attributes to manage a
+deck manually.
+
+core.run() function will run all decks initialized (in this case
+only one) until send signal KILL or push the quit button.
+"""
 import os
 import typer
 
@@ -69,18 +76,16 @@ def main(device_id: int=0,
 
     if len(core.streamdecks) <= 0:
         print("Not Stream deck found")
-        raise typer.Exit()
+        raise typer.Exit(1)
 
-    core.initialize_deck(device_id, asset_path=asset_path, font=os.path.join(asset_path, "Roboto-Regular.ttf"))
+    deck = core.initialize_deck(device_id, asset_path=asset_path, font=os.path.join(asset_path, "Roboto-Regular.ttf"))
 
-    for deck in core.decks:
-        set_middle_row(deck, asset_path)
-        set_middle_col(deck, asset_path)
-        set_corners(deck)
-        set_center_button(deck, asset_path)
-        set_last_button(deck, asset_path)
-        deck.render()
-
+    set_middle_row(deck, asset_path)
+    set_middle_col(deck, asset_path)
+    set_corners(deck)
+    set_center_button(deck, asset_path)
+    set_last_button(deck, asset_path)
+    deck.render()
     core.run()
 
 if __name__ == "__main__":
