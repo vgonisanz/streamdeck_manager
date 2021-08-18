@@ -9,10 +9,20 @@ class FSMBase():
     """
     Finite state machine base.
 
-    States start, wait, run and end are reserved for all children.
+    Some states are reserved, and cannot be use for custom
+    purposes or functions for all childrens of FSMBase and
+    classes used as models. The names reserved are:
+    
+    - start: State used as initial state of the FSM.
+    - wait: Function used to wait until the end of the FSM.
+    - reset: Trigger function to reset the FSM.
+    - run: Trigger function to start running the FSM.
+    - end: State used to cleanup the FSM.
+    - exit: Trigger function returnable to fore end the FSM.
 
     The machine created with this class can be used in
     two ways:
+
     - calling wait method: Run the machine and free
     in end state with a transition.
     - calling run method: Run the machine and let execution 
@@ -34,7 +44,6 @@ class FSMBase():
         Users can define any name except start and
         end. And must provide a valid initial value.
         """
-        self._model = model
         self._machine = transitions.Machine(
             model=model,
             states=self._states,
@@ -46,6 +55,17 @@ class FSMBase():
             dest=initial,
             before=before,
             after=after
+        )
+        self._machine.add_transition(
+            trigger='reset',
+            source='*',
+            dest='start'
+        )
+        self._machine.add_transition(
+            trigger='exit',
+            source='*',
+            dest='end',
+            after=self._release
         )
     
     def wait(self):

@@ -55,6 +55,7 @@ python streamdeck_manager/samples/device_info.py
 python streamdeck_manager/samples/basic_usage.py
 python streamdeck_manager/samples/buttons_types.py
 python streamdeck_manager/samples/tiled_image.py
+python streamdeck_manager/samples/menu.py --iterations 2
 ```
 
 ## Credits
