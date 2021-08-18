@@ -29,14 +29,15 @@ class Core():
     def initialize_deck(self, index, asset_path, font):
         if index >= len(self.streamdecks):
             logger.warning(f"Deck index {index} is too high")
-            return False
+            return None
         
         if index < 0:
             logger.warning(f"Deck index {index} is too low")
-            return False
+            return None
 
         logger.debug(f"Creating deck with index: {index}")
         self._decks[index] = Deck(self.streamdecks[index], asset_path=asset_path, font=font)
+        return self.get_deck(index)
 
     @property
     def streamdecks(self):

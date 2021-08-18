@@ -1,3 +1,9 @@
+"""
+Basic sample to manage a deck and its panel manually.
+
+core.run() function will run all decks initialized (in this case
+only one) until send signal KILL or push the quit button.
+"""
 import os
 import sys
 import logging
@@ -42,10 +48,11 @@ def main(device_id: int=0,
 
     if len(core.streamdecks) <= 0:
         print("Not Stream deck found")
-        raise typer.Exit()
+        raise typer.Exit(1)
 
-    if not core.initialize_deck(device_id, asset_path=asset_path, font=os.path.join(asset_path, "Roboto-Regular.ttf")):
-        sys.exit(0)
+    deck = core.initialize_deck(device_id, asset_path=asset_path, font=os.path.join(asset_path, "Roboto-Regular.ttf"))
+    if not deck:
+        raise typer.Exit(2)
 
     deck = core.get_deck(device_id)
     set_buttons(deck, asset_path)
