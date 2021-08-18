@@ -10,7 +10,12 @@ from streamdeck_manager.entities import Button
 logger = logging.getLogger(__name__) 
 
 class Menu(FSMBase):
-
+    """
+    Menu is a finite state machine to manage automatically a list of
+    buttons. This class update the panel automatically and provide a navigation
+    FSM using its buttons. The back button set the FSM to the end
+    state and release the control with a thread called wait function.
+    """
     def __init__(self, deck, back_icon_path, next_icon_path, previous_icon_path):
         self._set_up_fsm()
         
@@ -23,7 +28,7 @@ class Menu(FSMBase):
         self._icon_prev = previous_icon_path
         self._buttons = []
         self._current_page = 0
-        self._menu_button_index = self._deck.get_col_range(self._deck.cols - 1)[-3:]
+        self._menu_button_index = self._deck.panel.get_col_range(self._deck.panel.cols - 1)[-3:]
         self._create_menu_buttons()
 
     def _set_up_fsm(self):
@@ -56,19 +61,19 @@ class Menu(FSMBase):
         )
 
     def _create_menu_buttons(self):
-        self._deck.set_button(self._menu_button_index[0],
+        self._deck.panel.set_button(self._menu_button_index[0],
                               Button(name=self._label_back,
                                      label=self._label_back, label_pressed="",
                                      icon=self._icon_back,
                                      callback = self.press_back)
         )
-        self._deck.set_button(self._menu_button_index[1],
+        self._deck.panel.set_button(self._menu_button_index[1],
                               Button(name=self._label_next,
                                      label=self._label_next, label_pressed="",
                                      icon=self._icon_next,
                                      callback = self.press_next)
         )
-        self._deck.set_button(self._menu_button_index[2],
+        self._deck.panel.set_button(self._menu_button_index[2],
                               Button(name=self._label_prev,
                                      label=self._label_prev, label_pressed="",
                                      icon=self._icon_prev,
@@ -79,7 +84,7 @@ class Menu(FSMBase):
         """
         Move to next page unless is the last one
         """
-        if self._current_page < len(self._buttons)/(self._deck.key_count - 3) - 1:
+        if self._current_page < len(self._buttons)/(self._deck.panel.key_count - 3) - 1:
             self._current_page += 1
             return True
         return False
@@ -98,10 +103,10 @@ class Menu(FSMBase):
         Set up all buttons except menu
         """
         element_index_in_page = 0
-        elements_per_page = self._deck.key_count - len(self._menu_button_index)
+        elements_per_page = self._deck.panel.key_count - len(self._menu_button_index)
         start_index = elements_per_page * self._current_page
 
-        for k in range(self._deck.key_count):
+        for k in range(self._deck.panel.key_count):
             if k in self._menu_button_index:
                 continue
 
@@ -110,22 +115,16 @@ class Menu(FSMBase):
             if current_index > len(self._buttons) - 1:
                 continue
 
-            self._deck.set_button(k, self._buttons[current_index])
+            self._deck.panel.set_button(k, self._buttons[current_index])
             element_index_in_page += 1
-
 
     def _reset_elements(self):
         """
         Set black buttons in page
         """
-        for k in range(self._deck.key_count):
+        for k in range(self._deck.panel.key_count):
             if not k in self._menu_button_index:
-                self._deck.set_button(k, Button(background="black"))
-
-
-    # def set_back_callback(self, callback):
-    #     back_button = self._deck.get_button(self._menu_button_index[0])
-    #     back_button.callback = callback
+                self._deck.panel.set_button(k, Button(background="black"))
 
     def set_buttons(self, buttons):
         self._current_page = 0

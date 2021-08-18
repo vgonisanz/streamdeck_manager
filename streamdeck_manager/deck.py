@@ -5,6 +5,7 @@ import logging
 from StreamDeck.ImageHelpers import PILHelper
 from PIL import Image, ImageDraw, ImageFont
 
+from streamdeck_manager.panel import Panel
 from streamdeck_manager.entities import (
     Button,
     Margin,
@@ -21,6 +22,10 @@ logger = logging.getLogger(__name__)
 class Deck():
     def __init__(self, deck, asset_path, font):
         """
+        This class manage all calls related with a physical deck
+        and manage its properties like panel buttons and
+        its framebuffers.
+
         deck: Deck device
         asset_path: Absolute root path for relative assets
         font: Absolute path with a valid ttf font (not relative to asset)
@@ -36,23 +41,19 @@ class Deck():
         self._font_size = 14
         self._font = ImageFont.truetype(font, self._font_size)
 
-        self._image_size = Size2D(width=self.image_size[0], height=self.image_size[1])
-
-        self._buttons = dict()
-        self.reset()
-        self.autopadding_bottom()
+        self._panel = Panel(rows=self._deck.key_layout()[0],
+                            cols=self._deck.key_layout()[1],
+                            key_count=self._deck.key_count(),
+                            image_size=Size2D(width=self.image_size[0], height=self.image_size[1]))
 
         self._deck.set_key_callback(self._invoke_callback)
-
-        #self._lock = threading.Lock()
-        #self._lock.acquire(blocking=False)
 
         logger.info(f"Opened {self.type} device with id {self.id})")
         return
     
     def __del__(self):
         """
-        Avoid error when kill with a signal
+        Avoid error when kill with a signal. TBR
         """
         for t in threading.enumerate():
             if t is threading.currentThread():
@@ -60,11 +61,12 @@ class Deck():
 
     def _invoke_callback(self, deck, key, state):
         logging.debug(f"Button callback in deck: {deck.id()} key: {key} state: {state}")
-        if key in self._buttons:
-            if self._buttons[key] != None:
+        buttons = self._panel.get_buttons()
+        if key in buttons:
+            if buttons[key] != None:
                 if state:
-                    self._buttons[key].invoke_callback()
-                self._render_button(key, self._buttons[key], state)
+                    buttons[key].invoke_callback()
+                self._render_button(key, buttons[key], state)
 
     def close(self):
         with self._deck:
@@ -72,9 +74,6 @@ class Deck():
             self._deck.reset()
             self._deck.close()
 
-    def reset(self):
-        for key in range(self._deck.key_count()):
-            self._buttons[key] = None
 
     def _draw_image(self, key, image):
         """
@@ -112,7 +111,7 @@ class Deck():
 
     def render(self):
         states = self._deck.key_states()
-        for key, button in self._buttons.items():
+        for key, button in self._panel.get_buttons().items():
             state = states[key]
             if button == None:
                 continue
@@ -135,8 +134,8 @@ class Deck():
         logger.info(f"\t - Id:\t\t\t{self.id}")
         logger.info(f"\t - Type:\t\t{self.type}")
         logger.info(f"\t - Key in total:\t{self._deck.key_count()}")
-        logger.info(f"\t - Rows:\t\t{self.rows}")
-        logger.info(f"\t - Cols:\t\t{self.cols}")
+        logger.info(f"\t - Rows:\t\t{self._panel.rows}")
+        logger.info(f"\t - Cols:\t\t{self._panel.cols}")
         logger.info(f"\t - Image size:\t\t{self.image_size}")
         logger.info(f"\t - Image format:\t{self.image_format}")
         logger.info(f"\t - Image flip:\t\t{flip_description[self.image_flip]}")
@@ -156,42 +155,6 @@ class Deck():
     @property
     def serialno(self):
         return self._deck.get_serial_number()
-
-    @property
-    def last_key(self):
-        return self._deck.key_count() - 1
-    
-    @property
-    def center_key(self):
-        return int(self._deck.key_count() / 2)
-
-    @property
-    def top_left_key(self):
-        return self.get_row_range(0)[0]
-
-    @property
-    def top_right_key(self):
-        return self.get_row_range(0)[-1]
-
-    @property
-    def bottom_left_key(self):
-        return self.get_row_range(self.rows - 1)[0]
-
-    @property
-    def bottom_right_key(self):
-        return self.get_row_range(self.rows - 1)[-1]
-    
-    @property
-    def key_count(self):
-        return self._deck.key_count()
-
-    @property
-    def rows(self):
-        return self._deck.key_layout()[0]
-    
-    @property
-    def cols(self):
-        return self._deck.key_layout()[1]
     
     @property
     def key_states(self):
@@ -217,89 +180,15 @@ class Deck():
     def font_size(self):
         return self._font_size
     
+    @property
+    def panel(self):
+        return self._panel
+
     def set_font_size(self, font_size):
         self._font_size = font_size
-    
-    def set_margins(self, top, right, bottom, left):
-        for _, button in self._buttons.items():
-            if not button:
-                continue
 
-            button.margin = Margin(top=top, right=right, bottom=bottom, left=left)
-
-    def set_label_pos(self, x, y):
-        for _, button in self._buttons.items():
-            if not button:
-                continue
-
-            button.label_pos = Point2D(x=x, y=y)
-
-    def autopadding_bottom(self):
-        """
-        Set padding with text in the botton automatically for all attached buttons
-        """
-        self.set_label_pos(self._image_size.width / 2, self._image_size.height - 5)
-        self.set_margins(top=0, right=0, bottom=20, left=0)
-        return
-
-    def autopadding_top(self):
-        """
-        Set padding with text in the top automatically for all attached buttons
-        """
-        self.set_label_pos(self._image_size.width / 2, 15)
-        self.set_margins(top=20, right=0, bottom=0, left=0)
-        return
-    
-    def autopadding_center(self):
-        """
-        Set padding with text in the center automatically for all attached buttons
-        """
-        self.set_label_pos(self._image_size.width / 2, self._image_size.height / 2)
-        self.set_margins(top=0, right=0, bottom=0, left=0)
-        return
-
-    @property
-    def range_buttons(self):
-        """
-        Return enumerator with all buttons
-        """
-        return range(0, self.last_key)
-    
-    def get_row_range(self, i):
-        """
-        Return enumerator with i-th row buttons. This iterator is empty if out of range.
-        """
-        value = iter([])
-        if i >= 0 and i < self.rows:
-            start = i * self.cols
-            end = start + self.cols
-            value = range(start, end)
-        return value
-    
-    def get_col_range(self, j):
-        """
-        Return enumerator with j-th col buttons. This iterator is empty if out of range.
-        """
-        value = iter([])
-        if j >= 0 and j < self.cols:
-            start = j
-            end = start + self.cols * self.rows
-            value = range(start, end, self.cols)
-        return value
-    
-    def get_button(self, key):
-        if not key in self._buttons:
-            logger.warning(f"Button {key} do not exist")
-            return None
-        return self._buttons[key]
-    
-    def set_button(self, key, button):
-        if not key in self._buttons:
-            logger.warning(f"Button {key} do not exist")
-            return
-
-        self._buttons[key] = button
-
+    def get_panel(self):
+        return self._panel
 
     def set_background(self, photo_path, callback):
         """
@@ -321,12 +210,12 @@ class Deck():
             # Use hidden button to have callback
             button = Button(hidden=True)
             button.callback = callback
-            self.set_button(key, button)
+            self._panel.set_button(key, button)
 
             # Manual draw the images
             self._draw_image(key, key_images[key])
 
-        self.autopadding_center()
+        self._panel.autopadding_center()
 
     def run(self):
         """
