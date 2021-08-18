@@ -1,4 +1,5 @@
 import os
+import sys
 import logging
 import typer
 
@@ -43,14 +44,14 @@ def main(device_id: int=0,
         print("Not Stream deck found")
         raise typer.Exit()
 
-    core.initialize_deck(device_id, asset_path=asset_path, font=os.path.join(asset_path, "Roboto-Regular.ttf"))
+    if not core.initialize_deck(device_id, asset_path=asset_path, font=os.path.join(asset_path, "Roboto-Regular.ttf")):
+        sys.exit(0)
 
-    for deck in core.decks:
-        set_buttons(deck, asset_path)
-        set_exit_button(deck, asset_path)
-        deck.panel.autopadding_bottom()
-        deck.render()
-    
+    deck = core.get_deck(device_id)
+    set_buttons(deck, asset_path)
+    set_exit_button(deck, asset_path)
+    deck.panel.autopadding_bottom()
+    deck.render()
     core.run()
 
 

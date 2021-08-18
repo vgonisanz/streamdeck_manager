@@ -27,13 +27,13 @@ class Core():
         logging.getLogger("transitions").setLevel(log_level_transitions)
 
     def initialize_deck(self, index, asset_path, font):
-        if index > len(self.streamdecks):
+        if index >= len(self.streamdecks):
             logger.warning(f"Deck index {index} is too high")
-            return
+            return False
         
         if index < 0:
             logger.warning(f"Deck index {index} is too low")
-            return
+            return False
 
         logger.debug(f"Creating deck with index: {index}")
         self._decks[index] = Deck(self.streamdecks[index], asset_path=asset_path, font=font)
@@ -59,6 +59,11 @@ class Core():
         A deck is our abstraction of a device to ease management. Naming can be confusing.
         """
         return self._decks.values()
+
+    def get_deck(self, index):
+        if index in self._decks:
+            return self._decks[index]
+        return None
 
     def run(self):
         for deck in self.decks:

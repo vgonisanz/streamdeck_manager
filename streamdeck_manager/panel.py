@@ -1,10 +1,8 @@
 import logging
 
 from streamdeck_manager.entities import (
-    Button,
     Margin,
     Point2D,
-    Size2D
 )
 
 logger = logging.getLogger(__name__) 

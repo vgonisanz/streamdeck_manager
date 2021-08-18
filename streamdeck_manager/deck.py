@@ -8,8 +8,6 @@ from PIL import Image, ImageDraw, ImageFont
 from streamdeck_manager.panel import Panel
 from streamdeck_manager.entities import (
     Button,
-    Margin,
-    Point2D,
     Size2D
 )
 from streamdeck_manager.utils import (
