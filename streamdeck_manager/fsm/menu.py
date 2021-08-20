@@ -1,7 +1,4 @@
-import threading
 import logging
-
-import transitions
 
 from streamdeck_manager.fsm.base import FSMBase
 from streamdeck_manager.entities import Button

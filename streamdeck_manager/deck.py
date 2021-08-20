@@ -179,6 +179,10 @@ class Deck():
         return self._font_size
     
     @property
+    def asset_path(self):
+        return self._asset_path
+
+    @property
     def panel(self):
         return self._panel
 
