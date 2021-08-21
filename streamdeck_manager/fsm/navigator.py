@@ -49,7 +49,7 @@ class Navigator(FSMBase):
             source='childen_folder',
             dest='childen_folder',
             conditions=[not self._is_root_folder],
-            before=None,
+            before=self._go_down,
             after=self._update_level
         )
         self._machine.add_transition(
@@ -57,17 +57,23 @@ class Navigator(FSMBase):
             source='childen_folder',
             dest='root_folder',
             conditions=[self._is_root_folder],
+            before=self._go_down,
+            after=self._update_level
+        )
+        self._machine.add_transition(
+            trigger='press_folder',
+            source='root_folder',
+            dest='childen_folder',
             before=None,
             after=self._update_level
         )
         self._machine.add_transition(
             trigger='press_folder',
-            source='*',
+            source='childen_folder',
             dest='childen_folder',
             before=None,
             after=self._update_level
         )
-        # Press folder any got new one
 
 
     def _is_root_folder(self):
@@ -99,9 +105,22 @@ class Navigator(FSMBase):
         menu.wait()
         self.press_back()   # Menu back button was pressed at this point because continue
 
-    def _pressed_element(self):
-        print("_pressed_element")
-    
+    def _go_up(self, filename):
+        logger.debug(f"Go into {filename}")
+        self._relative_path = os.path.join(self._relative_path, filename)
+
+    def _go_down(self):
+        self._relative_path = os.path.split(self._relative_path)[0]
+        logger.debug(f"Go into {self._relative_path}")
+
+    def _on_click(self, **kwargs):
+        filename = kwargs["name"]
+        logger.debug(f"_on_click {filename}")
+        abspath = os.path.join(self._root_path, self._relative_path, filename)
+        if self._is_folder(abspath):
+            self._go_up(filename)
+            self.press_folder()
+        
     def _reset_elements(self):
         """
         Set black buttons in page
@@ -109,18 +128,23 @@ class Navigator(FSMBase):
         for k in range(self._deck.panel.key_count):
             self._deck.panel.set_button(k, Button(background="black"))
     
+    def _ext_from_file(self, filename):
+        return os.path.splitext(filename)[-1].replace(".", "")
+
     def _create_dir_button(self, dir):
         return Button(name=f"{dir}",
                       label=f"{dir}", label_pressed="go up",
                       icon=os.path.join(self._deck.asset_path, "folder.png"),
                       label_pos=Point2D(x=self._deck.panel.image_size.width/2, y=self._deck.panel.image_size.height*2/3),
-                      callback=self._pressed_element)
+                      callback=self._on_click,
+                      kwargs=dict(name=dir))
     
     def _create_file_button(self, filename):
-        ext = os.path.splitext(filename)[-1].replace(".", "")
+        ext = self._ext_from_file(filename)
         return Button(name=f"{filename}",
                       label=f"{filename}", label_pressed="",
                       label_pos=Point2D(x=self._deck.panel.image_size.width/2, y=self._deck.panel.image_size.height - 5),
                       icon=os.path.join(self._deck.asset_path, "files", f"{ext}.png"),
                       margin=Margin(top=0, right=0, bottom=20, left=0),
-                      callback=self._pressed_element)
+                      callback=self._on_click,
+                      kwargs=dict(name=filename))

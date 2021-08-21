@@ -32,7 +32,8 @@ class Button(pydantic.BaseModel):
     label_pos: Point2D = Point2D()
     hidden: bool = False
     callback: typing.Callable = None
+    kwargs: typing.Any = dict()
 
     def invoke_callback(self):
         if self.callback:
-            self.callback()
+            self.callback(**self.kwargs)
