@@ -118,10 +118,9 @@ class Navigator(FSMBase):
     
     def _create_file_button(self, filename):
         ext = os.path.splitext(filename)[-1].replace(".", "")
-        print(ext)
-        
         return Button(name=f"{filename}",
                       label=f"{filename}", label_pressed="",
                       label_pos=Point2D(x=self._deck.panel.image_size.width/2, y=self._deck.panel.image_size.height - 5),
+                      icon=os.path.join(self._deck.asset_path, "files", f"{ext}.png"),
                       margin=Margin(top=0, right=0, bottom=20, left=0),
                       callback=self._pressed_element)

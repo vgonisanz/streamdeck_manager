@@ -94,6 +94,9 @@ class Deck():
         if icon == '':
             image = PILHelper.create_image(self._deck, background=button.background)
         else:
+            if not os.path.isfile(icon):
+                logger.warning(f"icon {icon} not found")
+                return
             pre_image = Image.open(icon)
             margin = button.margin
             image = PILHelper.create_scaled_image(self._deck,

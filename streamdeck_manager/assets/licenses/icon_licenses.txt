@@ -1,3 +1,6 @@
-The png icon files have a free License usage from Flatico stickers.
+The png icon files have a free License usage from Flatico and prettycons stickers.
 
-By freepic. See https://www.flaticon.com
+- Buttons: By freepic.
+- File types: By prettycons.
+
+For more info see https://www.flaticon.com
