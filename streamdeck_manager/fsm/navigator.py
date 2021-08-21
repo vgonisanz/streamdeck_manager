@@ -90,11 +90,11 @@ class Navigator(FSMBase):
                 next_icon_path=os.path.join(asset_path, "next.png"),
                 previous_icon_path=os.path.join(asset_path, "back.png")
         )
-        for _, dirs, files in os.walk(path):
-            for dir in dirs:
-                buttons.append(self._create_dir_button(dir))
-            for filename in files:
-                buttons.append(self._create_file_button(filename))
+        file_tuple = next(os.walk(path))
+        for dir in file_tuple[1]:
+            buttons.append(self._create_dir_button(dir))
+        for filename in file_tuple[2]:
+            buttons.append(self._create_file_button(filename))
         menu.set_buttons(buttons)
         menu.wait()
         self.press_back()   # Menu back button was pressed at this point because continue
