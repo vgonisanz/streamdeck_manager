@@ -3,7 +3,7 @@ import logging
 
 from streamdeck_manager.fsm.base import FSMBase
 from streamdeck_manager.fsm.menu import Menu
-from streamdeck_manager.entities import Button, Point2D
+from streamdeck_manager.entities import Button, Point2D, Margin
 
 logger = logging.getLogger(__name__) 
 
@@ -36,12 +36,12 @@ class Navigator(FSMBase):
             "childen_folder"
         ]
         self._append_states(states)
-        self._create_fsm(model=self, initial="root_folder", before=self._update_level)#, after=self._update)
+        self._create_fsm(model=self, initial="root_folder", after=self._update_level)#, after=self._update)
         self._machine.add_transition(
             trigger='press_back',
             source='root_folder',
             dest='end',
-            before=self._update_level,
+            before=self._reset_elements,
             after=self._release
         )
         self._machine.add_transition(
@@ -49,20 +49,23 @@ class Navigator(FSMBase):
             source='childen_folder',
             dest='childen_folder',
             conditions=[not self._is_root_folder],
-            before=self._update_level
+            before=None,
+            after=self._update_level
         )
         self._machine.add_transition(
             trigger='press_back',
             source='childen_folder',
             dest='root_folder',
             conditions=[self._is_root_folder],
-            before=self._update_level
+            before=None,
+            after=self._update_level
         )
         self._machine.add_transition(
             trigger='press_folder',
             source='*',
             dest='childen_folder',
-            before=self._update_level
+            before=None,
+            after=self._update_level
         )
         # Press folder any got new one
 
@@ -87,21 +90,38 @@ class Navigator(FSMBase):
                 next_icon_path=os.path.join(asset_path, "next.png"),
                 previous_icon_path=os.path.join(asset_path, "back.png")
         )
-        buttons = []
-        file_list = os.listdir(path)
-        for file in file_list:
-            # Check folder / file to set icon and callback
-            print(file)
-            button = Button(name="..",
-                            label=f"{file}", label_pressed="",
-                            label_pos=Point2D(x=self._deck.image_size[0]/2, y=self._deck.image_size[1]/2),
-                            callback=self._pressed_element)
-            buttons.append(button)
+        for _, dirs, files in os.walk(path):
+            for dir in dirs:
+                buttons.append(self._create_dir_button(dir))
+            for filename in files:
+                buttons.append(self._create_file_button(filename))
         menu.set_buttons(buttons)
-        print("prewait")
         menu.wait()
-        print("wait")
-        #menu.reset()
+        self.press_back()   # Menu back button was pressed at this point because continue
 
     def _pressed_element(self):
         print("_pressed_element")
+    
+    def _reset_elements(self):
+        """
+        Set black buttons in page
+        """
+        for k in range(self._deck.panel.key_count):
+            self._deck.panel.set_button(k, Button(background="black"))
+    
+    def _create_dir_button(self, dir):
+        return Button(name=f"{dir}",
+                      label=f"{dir}", label_pressed="go up",
+                      icon=os.path.join(self._deck.asset_path, "folder.png"),
+                      label_pos=Point2D(x=self._deck.panel.image_size.width/2, y=self._deck.panel.image_size.height*2/3),
+                      callback=self._pressed_element)
+    
+    def _create_file_button(self, filename):
+        ext = os.path.splitext(filename)[-1].replace(".", "")
+        print(ext)
+        
+        return Button(name=f"{filename}",
+                      label=f"{filename}", label_pressed="",
+                      label_pos=Point2D(x=self._deck.panel.image_size.width/2, y=self._deck.panel.image_size.height - 5),
+                      margin=Margin(top=0, right=0, bottom=20, left=0),
+                      callback=self._pressed_element)

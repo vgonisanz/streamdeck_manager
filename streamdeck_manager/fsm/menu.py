@@ -64,13 +64,13 @@ class Menu(FSMBase):
                                      icon=self._icon_back,
                                      callback = self.press_back)
         )
-        self._deck.panel.set_button(self._menu_button_index[1],
+        self._deck.panel.set_button(self._menu_button_index[2],
                               Button(name=self._label_next,
                                      label=self._label_next, label_pressed="",
                                      icon=self._icon_next,
                                      callback = self.press_next)
         )
-        self._deck.panel.set_button(self._menu_button_index[2],
+        self._deck.panel.set_button(self._menu_button_index[1],
                               Button(name=self._label_prev,
                                      label=self._label_prev, label_pressed="",
                                      icon=self._icon_prev,
