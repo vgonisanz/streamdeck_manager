@@ -69,6 +69,15 @@ FSM run iterations times (reset with back button):
 python streamdeck_manager/samples/menu.py --iterations 2
 ```
 
+### Navigation widget
+
+Run a Finite state machine with all buttons to navigate in a folder path. It
+shows folders and files with icon if provided in the asset path.
+
+```bash
+python streamdeck_manager/samples/navigator.py --root-path $HOME
+```
+
 ## Credits
 
 - vgonisanz

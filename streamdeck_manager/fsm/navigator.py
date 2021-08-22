@@ -1,6 +1,5 @@
 import os
 import logging
-import threading
 
 from streamdeck_manager.fsm.base import FSMBase
 from streamdeck_manager.fsm.menu import Menu
@@ -104,9 +103,13 @@ class Navigator(FSMBase):
                 end_callback=self.press_back
         )
         file_tuple = next(os.walk(path))
-        for dir in file_tuple[1]:
+        current_dir = file_tuple[1]
+        current_files = file_tuple[2]
+        current_dir.sort()
+        current_files.sort()
+        for dir in current_dir:
             buttons.append(self._create_dir_button(dir))
-        for filename in file_tuple[2]:
+        for filename in current_files:
             buttons.append(self._create_file_button(filename))
         menu.set_buttons(buttons)
         menu.run()
@@ -147,10 +150,23 @@ class Navigator(FSMBase):
     
     def _create_file_button(self, filename):
         ext = self._ext_from_file(filename)
+        file_icon = f"{ext}.png"
+        if ext == '':
+            file_icon = f"bin.png"
+        file_icon_path = os.path.join(self._deck.asset_path, "files", file_icon)
+        if not os.path.isfile(file_icon_path):
+            file_icon_path = self._use_default_icon(file_icon_path)
         return Button(name=f"{filename}",
                       label=f"{filename}", label_pressed="",
                       label_pos=Point2D(x=self._deck.panel.image_size.width/2, y=self._deck.panel.image_size.height - 5),
-                      icon=os.path.join(self._deck.asset_path, "files", f"{ext}.png"),
+                      icon=file_icon_path,
                       margin=Margin(top=0, right=0, bottom=20, left=0),
                       callback=self._on_click,
                       kwargs=dict(name=filename))
+    
+    def _use_default_icon(self, file_icon_path):
+        if os.path.isfile(os.path.join(self._deck.asset_path, "files", f"bin.png")):
+            file_icon_path = os.path.join(self._deck.asset_path, "files", f"bin.png")
+        else:
+            file_icon_path = ""
+        return file_icon_path
