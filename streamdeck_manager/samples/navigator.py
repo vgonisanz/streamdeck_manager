@@ -19,7 +19,7 @@ def main(device_id: int=0,
     if not deck:
         raise typer.Exit(2)
 
-    navigator = Navigator(deck, root_path)
+    navigator = Navigator(deck, root_path, None)
     navigator.wait()
 
 

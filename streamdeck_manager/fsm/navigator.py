@@ -1,5 +1,6 @@
 import os
 import logging
+import threading
 
 from streamdeck_manager.fsm.base import FSMBase
 from streamdeck_manager.fsm.menu import Menu
@@ -15,8 +16,8 @@ class Navigator(FSMBase):
     navigate back pressing back button. If back is pushed in root folder,
     the FSM go to end state.
     """
-    def __init__(self, deck, root_path):
-        self._set_up_fsm()
+    def __init__(self, deck, root_path, end_callback=None):
+        self._set_up_fsm(end_callback)
         
         self._deck = deck
         self._root_path = root_path
@@ -24,19 +25,22 @@ class Navigator(FSMBase):
         self._menu = Menu(deck,
                 back_icon_path=os.path.join(deck.asset_path, "eject.png"),
                 next_icon_path=os.path.join(deck.asset_path, "next.png"),
-                previous_icon_path=os.path.join(deck.asset_path, "back.png")
+                previous_icon_path=os.path.join(deck.asset_path, "back.png"),
+                end_callback=self.press_back
         )
         self._back_button_index = 0
         
 
-    def _set_up_fsm(self):
+    def _set_up_fsm(self, end_callback):
         super().__init__()
         states = [ 
             "root_folder",
             "childen_folder"
         ]
         self._append_states(states)
-        self._create_fsm(model=self, initial="root_folder", after=self._update_level)#, after=self._update)
+        self._create_fsm(model=self, initial="root_folder",
+                         after_start=self._update_level,
+                         before_end=end_callback)
         self._machine.add_transition(
             trigger='press_back',
             source='root_folder',
@@ -48,7 +52,7 @@ class Navigator(FSMBase):
             trigger='press_back',
             source='childen_folder',
             dest='childen_folder',
-            conditions=[not self._is_root_folder],
+            conditions=[self._is_not_root_folder],
             before=self._go_down,
             after=self._update_level
         )
@@ -56,7 +60,7 @@ class Navigator(FSMBase):
             trigger='press_back',
             source='childen_folder',
             dest='root_folder',
-            conditions=[self._is_root_folder],
+            conditions=[self._is_target_folder_root],
             before=self._go_down,
             after=self._update_level
         )
@@ -75,11 +79,13 @@ class Navigator(FSMBase):
             after=self._update_level
         )
 
-
-    def _is_root_folder(self):
-        if self._relative_path == '':
+    def _is_target_folder_root(self):
+        if os.path.split(self._relative_path)[0] == '':
             return True
         return False
+
+    def _is_not_root_folder(self):
+        return not self._is_target_folder_root()
 
     def _is_folder(self, path):
         return os.path.isdir(path)
@@ -94,7 +100,8 @@ class Navigator(FSMBase):
         asset_path = self._deck.asset_path
         menu = Menu(self._deck, back_icon_path=os.path.join(asset_path, "eject.png"),
                 next_icon_path=os.path.join(asset_path, "next.png"),
-                previous_icon_path=os.path.join(asset_path, "back.png")
+                previous_icon_path=os.path.join(asset_path, "back.png"),
+                end_callback=self.press_back
         )
         file_tuple = next(os.walk(path))
         for dir in file_tuple[1]:
@@ -102,16 +109,15 @@ class Navigator(FSMBase):
         for filename in file_tuple[2]:
             buttons.append(self._create_file_button(filename))
         menu.set_buttons(buttons)
-        menu.wait()
-        self.press_back()   # Menu back button was pressed at this point because continue
+        menu.run()
 
     def _go_up(self, filename):
-        logger.debug(f"Go into {filename}")
+        logger.debug(f"Go up to folder {filename}")
         self._relative_path = os.path.join(self._relative_path, filename)
 
     def _go_down(self):
         self._relative_path = os.path.split(self._relative_path)[0]
-        logger.debug(f"Go into {self._relative_path}")
+        logger.debug(f"Go down to folder {self._relative_path}")
 
     def _on_click(self, **kwargs):
         filename = kwargs["name"]
