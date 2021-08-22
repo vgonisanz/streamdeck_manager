@@ -38,6 +38,10 @@ class Panel():
     @property
     def cols(self):
         return self._cols
+    
+    @property
+    def image_size(self):
+        return self._image_size
 
     def get_button(self, key):
         if not key in self._buttons:

@@ -8,7 +8,7 @@ from StreamDeck.DeviceManager import DeviceManager
 logger = logging.getLogger(__name__) 
 
 class Core():
-    def __init__(self, log_level=logging.DEBUG, log_level_transitions=logging.ERROR):
+    def __init__(self, log_level=logging.DEBUG, log_level_transitions=logging.CRITICAL):
         self._initialize_logs(log_level, log_level_transitions)
 
         self._cleanup_done = False

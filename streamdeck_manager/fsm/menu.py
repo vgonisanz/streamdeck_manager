@@ -1,7 +1,4 @@
-import threading
 import logging
-
-import transitions
 
 from streamdeck_manager.fsm.base import FSMBase
 from streamdeck_manager.entities import Button
@@ -16,8 +13,8 @@ class Menu(FSMBase):
     FSM using its buttons. The back button set the FSM to the end
     state and release the control with a thread called wait function.
     """
-    def __init__(self, deck, back_icon_path, next_icon_path, previous_icon_path):
-        self._set_up_fsm()
+    def __init__(self, deck, back_icon_path, next_icon_path, previous_icon_path, end_callback=None):
+        self._set_up_fsm(end_callback)
         
         self._deck = deck
         self._label_back = "back"
@@ -31,18 +28,20 @@ class Menu(FSMBase):
         self._menu_button_index = self._deck.panel.get_col_range(self._deck.panel.cols - 1)[-3:]
         self._create_menu_buttons()
 
-    def _set_up_fsm(self):
+    def _set_up_fsm(self, end_callback):
         super().__init__()
         states = [ 
             "in_page_current",
         ]
         self._append_states(states)
-        self._create_fsm(model=self, initial="in_page_current", before=None, after=self._update)
+        self._create_fsm(model=self, initial="in_page_current",
+                         before_start=None, after_start=self._update,
+                         before_end=end_callback)
         self._machine.add_transition(
             trigger='press_back',
             source='in_page_current',
             dest='end',
-            before=self._reset_elements,
+            before=end_callback,    # Don't forget end_ballback in dest end states always
             after=self._release
         )
         self._machine.add_transition(
@@ -67,13 +66,13 @@ class Menu(FSMBase):
                                      icon=self._icon_back,
                                      callback = self.press_back)
         )
-        self._deck.panel.set_button(self._menu_button_index[1],
+        self._deck.panel.set_button(self._menu_button_index[2],
                               Button(name=self._label_next,
                                      label=self._label_next, label_pressed="",
                                      icon=self._icon_next,
                                      callback = self.press_next)
         )
-        self._deck.panel.set_button(self._menu_button_index[2],
+        self._deck.panel.set_button(self._menu_button_index[1],
                               Button(name=self._label_prev,
                                      label=self._label_prev, label_pressed="",
                                      icon=self._icon_prev,

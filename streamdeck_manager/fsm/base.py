@@ -37,7 +37,9 @@ class FSMBase():
     def _append_states(self, states):
         self._states += states
     
-    def _create_fsm(self, model, initial, before=None, after=None):
+    def _create_fsm(self, model, initial,
+                    before_start=None, after_start=None,
+                    before_end=None):
         """
         Create a Finite state machine to use case
         with start transition only when trigger run.
@@ -53,8 +55,8 @@ class FSMBase():
             trigger='run',
             source='start',
             dest=initial,
-            before=before,
-            after=after
+            before=before_start,
+            after=after_start
         )
         self._machine.add_transition(
             trigger='reset',
@@ -65,6 +67,7 @@ class FSMBase():
             trigger='exit',
             source='*',
             dest='end',
+            before=before_end,
             after=self._release
         )
     
