@@ -95,6 +95,9 @@ dist: clean-build clean-pyc ## build wheel package (compiled)
 sdist: clean-build clean-pyc ## build a source distribution (sdist)
 	python setup.py sdist
 
+publish:	## publish packages, use TARGET sdist with pypi
+	twine upload dist/*
+
 # Cleanup
 
 clean: clean-build clean-dist clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
