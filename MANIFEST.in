@@ -3,5 +3,6 @@ global-exclude *.py[cod] __pycache__ *.so *.c
 include CONTRIBUTING.md
 include CHANGELOG.md
 include README.md
+include requirements.in
 include streamdeck_manager/assets/*
 include streamdeck_manager/assets/**/*
