@@ -10,8 +10,10 @@ from setuptools.command.build_ext import build_ext as _build_ext
 # Packages to include in the distribution
 packages = find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"])
 
-# Additional data required to install this package
-package_data = {}
+# Additional data required to install this package (Use MANIFEST.in to work with make sdist)
+package_data = {
+
+}
 
 # Files with that are data out of the package
 # data_files=[('my_data', ['data/data_file'])],
@@ -25,16 +27,14 @@ classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
     'Natural Language :: English',
-    'Topic :: Software Development :: Tools',
-    'License :: OSI Approved :: GNU General Public License v3',
+    'License :: OSI Approved :: MIT License',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.7',
-    'Programming Language :: Python :: Implementation :: CPython',
     'Programming Language :: Python :: Implementation :: PyPy'
 ]
 
 # Keywords to help users find this package on PyPi
-keywords = ''
+keywords = ['elgato', 'streamdeck', 'userfriendly', 'manager']
 
 here = os.path.abspath(os.path.dirname(__file__))
 meta = {}
@@ -64,4 +64,5 @@ setup(
     package_data=package_data,
     include_package_data=True,
     python_requires=">=3.6.*, <4",
+    download_url='https://github.com/vgonisanz/streamdeck_manager/archive/refs/tags/v0.1.0.tar.gz'
 )

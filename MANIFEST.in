@@ -1,0 +1,7 @@
+global-exclude *.py[cod] __pycache__ *.so *.c
+
+include CONTRIBUTING.md
+include CHANGELOG.md
+include README.md
+include streamdeck_manager/assets/*
+include streamdeck_manager/assets/**/*
