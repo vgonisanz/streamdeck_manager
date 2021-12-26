@@ -30,7 +30,9 @@ In a development bash, use `--help` to customize parameters:
 
 ### Device info
 
-Read the HW info and print in stdout:
+Read the HW info and print in stdout.
+
+![](images/device_info.png)
 
 ```bash
 python streamdeck_manager/samples/device_info.py
@@ -38,7 +40,9 @@ python streamdeck_manager/samples/device_info.py
 
 ### Basic buttons
 
-Basic panel with buttons and callbacks:
+Basic panel with buttons and callbacks.
+
+![](images/basic_usage.png)
 
 ```bash
 python streamdeck_manager/samples/basic_usage.py
@@ -46,7 +50,9 @@ python streamdeck_manager/samples/basic_usage.py
 
 ### More buttons
 
-Another panel with different type of buttons:
+Another panel with different type of buttons.
+
+![](images/buttons_types.png)
 
 ```bash
 python streamdeck_manager/samples/buttons_types.py
@@ -54,7 +60,9 @@ python streamdeck_manager/samples/buttons_types.py
 
 ### Background photo
 
-Set up a background image:
+Set up a background image.
+
+![](images/tiled_image.png)
 
 ```bash
 python streamdeck_manager/samples/tiled_image.py
@@ -63,7 +71,9 @@ python streamdeck_manager/samples/tiled_image.py
 ### Menu widget
 
 Run a Finite state machine with all buttons to navigate in several pages, the
-FSM run iterations times (reset with back button):
+FSM run iterations times (reset with back button).
+
+![](images/menu.png)
 
 ```bash
 python streamdeck_manager/samples/menu.py --iterations 2
@@ -73,6 +83,8 @@ python streamdeck_manager/samples/menu.py --iterations 2
 
 Run a Finite state machine with all buttons to navigate in a folder path. It
 shows folders and files with icon if provided in the asset path.
+
+![](images/navigator.png)
 
 ```bash
 python streamdeck_manager/samples/navigator.py --root-path $HOME
