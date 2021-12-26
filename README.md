@@ -1,7 +1,6 @@
 # Streamdeck manager POC
 
-This is a proof of concept to make different use cases in a easy way using any model
-of elgato Stream Deck.
+Library to manage elgato stream deck in a easy way with several use cases implemented.
 
 This library have been tested with:
 
