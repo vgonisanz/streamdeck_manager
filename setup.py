@@ -11,7 +11,9 @@ from setuptools.command.build_ext import build_ext as _build_ext
 packages = find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"])
 
 # Additional data required to install this package
-package_data = {}
+package_data = {
+    'streamdeck_manager': ['assets/*', 'assets/**/*']
+}
 
 # Files with that are data out of the package
 # data_files=[('my_data', ['data/data_file'])],

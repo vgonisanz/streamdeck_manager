@@ -26,7 +26,12 @@ source .tox/streamdeck_manager/bin/activate     # All bash session
 
 ## Samples
 
-In a development bash, use `--help` to customize parameters:
+In a development bash, use `--help` to customize parameters. If you install the library
+a default folder with assets is installed. You may give another asset path to make them work
+with your custom assets.
+
+If you install the library use the entrypoint running the command in your bash. In development
+you can run them directly the script given. Both support same options.
 
 ### Device info
 
@@ -38,6 +43,8 @@ Read the HW info and print in stdout.
 python streamdeck_manager/samples/device_info.py
 ```
 
+Entrypoint: `sdm-info`
+
 ### Basic buttons
 
 Basic panel with buttons and callbacks.
@@ -47,6 +54,8 @@ Basic panel with buttons and callbacks.
 ```bash
 python streamdeck_manager/samples/basic_usage.py
 ```
+
+Entrypoint: `sdm-basic`
 
 ### More buttons
 
@@ -58,6 +67,8 @@ Another panel with different type of buttons.
 python streamdeck_manager/samples/buttons_types.py
 ```
 
+Entrypoint: `sdm-more-buttons`
+
 ### Background photo
 
 Set up a background image.
@@ -67,6 +78,8 @@ Set up a background image.
 ```bash
 python streamdeck_manager/samples/tiled_image.py
 ```
+
+Entrypoint: `sdm-background`
 
 ### Menu widget
 
@@ -79,6 +92,8 @@ FSM run iterations times (reset with back button).
 python streamdeck_manager/samples/menu.py --iterations 2
 ```
 
+Entrypoint: `sdm-menu`
+
 ### Navigation widget
 
 Run a Finite state machine with all buttons to navigate in a folder path. It
@@ -89,6 +104,8 @@ shows folders and files with icon if provided in the asset path.
 ```bash
 python streamdeck_manager/samples/navigator.py --root-path $HOME
 ```
+
+Entrypoint: `sdm-navigator`
 
 ## Credits
 

@@ -26,5 +26,9 @@ def main(asset_path: str=os.path.join(os.path.dirname(__file__), "..", "assets")
     core.run()
 
 
-if __name__ == "__main__":
+def run():
     typer.run(main)
+
+
+if __name__ == "__main__":
+    run()

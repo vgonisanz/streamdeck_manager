@@ -45,5 +45,9 @@ def main(device_id: int=0,
     print("Last menu executed")
 
 
-if __name__ == "__main__":
+def run():
     typer.run(main)
+
+
+if __name__ == "__main__":
+    run()

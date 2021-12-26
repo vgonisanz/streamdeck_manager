@@ -90,9 +90,6 @@ version-set-tag: ## set and commit the version to the specified VERSION
 	bump2version --commit --tag --current-version $(CURRENT_VERSION) --new-version $(VERSION) minor
 
 dist: clean-build clean-pyc ## build wheel package (compiled)
-	python setup.py bdist_wheel --cythonize
-
-dist-dev: clean-build clean-pyc ## build wheel package (source code)
 	python setup.py bdist_wheel
 
 sdist: clean-build clean-pyc ## build a source distribution (sdist)
