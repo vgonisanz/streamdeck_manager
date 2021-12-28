@@ -14,6 +14,18 @@ class Navigator(FSMBase):
     automatically enter in that folder showing files and folders. You can
     navigate back pressing back button. If back is pushed in root folder,
     the FSM go to end state.
+
+    This FSM use plain buttons to work. It is possible to set up
+    and external callback when a button is pressed using
+    `set_on_click_callback`. Provide a func(**kwargs) that
+    will be called when user press a button in the navigation.
+
+    The kwargs available are:
+    - name: filename or folder.
+    - is_folder: If true is a folder, else it is a file.
+    - extension: Latest file extension if it is a file. Else empty.
+    - folder: The folder containing the file
+    - abspath: Absolute path = folder + name
     """
     def __init__(self, deck, root_path, end_callback=None):
         self._set_up_fsm(end_callback)
@@ -28,7 +40,10 @@ class Navigator(FSMBase):
                 end_callback=self.press_back
         )
         self._back_button_index = 0
-        
+        self._external_on_click_callback = None
+
+    def set_on_click_callback(self, func):
+        self._external_on_click_callback = func
 
     def _set_up_fsm(self, end_callback):
         super().__init__()
@@ -125,8 +140,25 @@ class Navigator(FSMBase):
     def _on_click(self, **kwargs):
         filename = kwargs["name"]
         logger.debug(f"_on_click {filename}")
-        abspath = os.path.join(self._root_path, self._relative_path, filename)
-        if self._is_folder(abspath):
+        folder = os.path.join(self._root_path, self._relative_path)
+        abspath = os.path.join(folder, filename)
+        is_folder = self._is_folder(abspath)
+        file_extension = ""
+        if not is_folder:
+            _, file_extension = os.path.splitext(filename)
+
+        kwargs = dict(
+            name=filename,
+            is_folder=is_folder,
+            extension=file_extension,
+            folder=folder,
+            abspath=abspath
+        )
+
+        if self._external_on_click_callback:
+            self._external_on_click_callback(**kwargs)
+
+        if is_folder:
             self._go_up(filename)
             self.press_folder()
         

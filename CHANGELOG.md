@@ -1,6 +1,16 @@
 # Changelog
 
-## 0.1.0 (2021-12-26)
+## 0.3.0 (Unreleased)
+
+### Added
+
+- ...
+
+### Changed
+
+- Navigator fsm now accept external callbacks to ease integrations.
+
+## 0.2.0 (2021-12-26)
 
 ### Added
 
