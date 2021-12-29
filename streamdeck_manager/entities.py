@@ -36,4 +36,6 @@ class Button(pydantic.BaseModel):
 
     def invoke_callback(self):
         if self.callback:
-            self.callback(**self.kwargs)
+            full_kwargs = self.kwargs
+            full_kwargs.update(dict(name=self.name, is_hidden=self.hidden))
+            self.callback(**full_kwargs)

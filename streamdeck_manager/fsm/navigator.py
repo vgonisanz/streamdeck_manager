@@ -14,6 +14,18 @@ class Navigator(FSMBase):
     automatically enter in that folder showing files and folders. You can
     navigate back pressing back button. If back is pushed in root folder,
     the FSM go to end state.
+
+    This FSM use plain buttons to work. It is possible to set up
+    and external callback when a button is pressed using
+    `set_on_click_callback`. Provide a func(**kwargs) that
+    will be called when user press a button in the navigation.
+
+    The kwargs available are:
+    - name: filename or folder.
+    - is_folder: If true is a folder, else it is a file.
+    - extension: Latest file extension if it is a file. Else empty.
+    - folder: The folder containing the file
+    - abspath: Absolute path = folder + name
     """
     def __init__(self, deck, root_path, end_callback=None):
         self._set_up_fsm(end_callback)
@@ -22,13 +34,15 @@ class Navigator(FSMBase):
         self._root_path = root_path
         self._relative_path = ''
         self._menu = Menu(deck,
-                back_icon_path=os.path.join(deck.asset_path, "eject.png"),
-                next_icon_path=os.path.join(deck.asset_path, "next.png"),
-                previous_icon_path=os.path.join(deck.asset_path, "back.png"),
-                end_callback=self.press_back
-        )
+                back_icon_path="eject.png",
+                next_icon_path="next.png",
+                previous_icon_path="back.png",
+                end_callback=self.press_back)
         self._back_button_index = 0
-        
+        self._external_on_click_callback = None
+
+    def set_on_click_callback(self, func):
+        self._external_on_click_callback = func
 
     def _set_up_fsm(self, end_callback):
         super().__init__()
@@ -78,12 +92,12 @@ class Navigator(FSMBase):
             after=self._update_level
         )
 
-    def _is_target_folder_root(self):
+    def _is_target_folder_root(self, **kwargs):
         if os.path.split(self._relative_path)[0] == '':
             return True
         return False
 
-    def _is_not_root_folder(self):
+    def _is_not_root_folder(self, **kwargs):
         return not self._is_target_folder_root()
 
     def _is_folder(self, path):
@@ -92,14 +106,14 @@ class Navigator(FSMBase):
     def _get_folder_elements(self, path):
         return os.listdir(path)
 
-    def _update_level(self):
+    def _update_level(self, **kwargs):
         path = os.path.join(self._root_path, self._relative_path)
         logger.debug(f"Update path {path}")
         buttons = []
-        asset_path = self._deck.asset_path
-        menu = Menu(self._deck, back_icon_path=os.path.join(asset_path, "eject.png"),
-                next_icon_path=os.path.join(asset_path, "next.png"),
-                previous_icon_path=os.path.join(asset_path, "back.png"),
+
+        menu = Menu(self._deck, back_icon_path="eject.png",
+                next_icon_path="next.png",
+                previous_icon_path="back.png",
                 end_callback=self.press_back
         )
         file_tuple = next(os.walk(path))
@@ -114,23 +128,40 @@ class Navigator(FSMBase):
         menu.set_buttons(buttons)
         menu.run()
 
-    def _go_up(self, filename):
+    def _go_up(self, filename, **kwargs):
         logger.debug(f"Go up to folder {filename}")
         self._relative_path = os.path.join(self._relative_path, filename)
 
-    def _go_down(self):
+    def _go_down(self, **kwargs):
         self._relative_path = os.path.split(self._relative_path)[0]
         logger.debug(f"Go down to folder {self._relative_path}")
 
     def _on_click(self, **kwargs):
         filename = kwargs["name"]
         logger.debug(f"_on_click {filename}")
-        abspath = os.path.join(self._root_path, self._relative_path, filename)
-        if self._is_folder(abspath):
+        folder = os.path.join(self._root_path, self._relative_path)
+        abspath = os.path.join(folder, filename)
+        is_folder = self._is_folder(abspath)
+        file_extension = ""
+        if not is_folder:
+            _, file_extension = os.path.splitext(filename)
+
+        kwargs = dict(
+            name=filename,
+            is_folder=is_folder,
+            extension=file_extension,
+            folder=folder,
+            abspath=abspath
+        )
+
+        if self._external_on_click_callback:
+            self._external_on_click_callback(**kwargs)
+
+        if is_folder:
             self._go_up(filename)
             self.press_folder()
         
-    def _reset_elements(self):
+    def _reset_elements(self, **kwargs):
         """
         Set black buttons in page
         """
@@ -143,7 +174,7 @@ class Navigator(FSMBase):
     def _create_dir_button(self, dir):
         return Button(name=f"{dir}",
                       label=f"{dir}", label_pressed="go up",
-                      icon=os.path.join(self._deck.asset_path, "folder.png"),
+                      icon="folder.png",
                       label_pos=Point2D(x=self._deck.panel.image_size.width/2, y=self._deck.panel.image_size.height*2/3),
                       callback=self._on_click,
                       kwargs=dict(name=dir))
@@ -151,11 +182,14 @@ class Navigator(FSMBase):
     def _create_file_button(self, filename):
         ext = self._ext_from_file(filename)
         file_icon = f"{ext}.png"
+
         if ext == '':
             file_icon = f"bin.png"
-        file_icon_path = os.path.join(self._deck.asset_path, "files", file_icon)
-        if not os.path.isfile(file_icon_path):
+        file_icon_path = os.path.join("files", file_icon)
+
+        if not os.path.isfile(os.path.join(self._deck._asset_path, file_icon_path)):
             file_icon_path = self._use_default_icon(file_icon_path)
+
         return Button(name=f"{filename}",
                       label=f"{filename}", label_pressed="",
                       label_pos=Point2D(x=self._deck.panel.image_size.width/2, y=self._deck.panel.image_size.height - 5),
@@ -165,8 +199,8 @@ class Navigator(FSMBase):
                       kwargs=dict(name=filename))
     
     def _use_default_icon(self, file_icon_path):
-        if os.path.isfile(os.path.join(self._deck.asset_path, "files", f"bin.png")):
-            file_icon_path = os.path.join(self._deck.asset_path, "files", f"bin.png")
+        if os.path.isfile(os.path.join(self._deck._asset_path, "files", f"bin.png")):
+            file_icon_path = os.path.join("files", f"bin.png")
         else:
             file_icon_path = ""
         return file_icon_path

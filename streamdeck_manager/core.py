@@ -26,7 +26,22 @@ class Core():
         logging.getLogger("PIL.PngImagePlugin").setLevel(logging.INFO)
         logging.getLogger("transitions").setLevel(log_level_transitions)
 
-    def initialize_deck(self, index, asset_path, font):
+    def initialize_deck(self, index=0, asset_path=None, font=None):
+        """
+        Initialize a deck object using core manager configuration.
+
+        Parameters:
+            - index: The id of the connected deck to be used.
+            - asset_path: Path containing all assets to be load. All argument paths relative to this one.
+              If not provided, it would use library assets path.
+            - font: Font path file to be used. If not provided, it would use library font.
+        """
+        if not asset_path:
+            asset_path = self.asset_path
+        
+        if not font:
+            font = self.font_path
+
         if index >= len(self.streamdecks):
             logger.warning(f"Deck index {index} is too high")
             return None
@@ -35,7 +50,7 @@ class Core():
             logger.warning(f"Deck index {index} is too low")
             return None
 
-        logger.debug(f"Creating deck with index: {index}")
+        logger.debug(f"Creating deck with index: {index}, assets: {asset_path}, font: {font}")
         self._decks[index] = Deck(self.streamdecks[index], asset_path=asset_path, font=font)
         return self.get_deck(index)
 
@@ -53,6 +68,19 @@ class Core():
         A list with device ids.
         """
         return list(range(len(self._streamdecks)))
+
+    @property
+    def asset_path(self):
+        """
+        Get the default library asset path. This path is installed with
+        the library and provide basic resources to use in the different
+        classes without provide your own.
+        """
+        return os.path.join(os.path.dirname(__file__), "assets")
+    
+    @property
+    def font_path(self):
+        return os.path.join(self.asset_path, "Roboto-Regular.ttf")
 
     @property
     def decks(self):
