@@ -92,12 +92,12 @@ class Navigator(FSMBase):
             after=self._update_level
         )
 
-    def _is_target_folder_root(self):
+    def _is_target_folder_root(self, **kwargs):
         if os.path.split(self._relative_path)[0] == '':
             return True
         return False
 
-    def _is_not_root_folder(self):
+    def _is_not_root_folder(self, **kwargs):
         return not self._is_target_folder_root()
 
     def _is_folder(self, path):
@@ -106,11 +106,11 @@ class Navigator(FSMBase):
     def _get_folder_elements(self, path):
         return os.listdir(path)
 
-    def _update_level(self):
+    def _update_level(self, **kwargs):
         path = os.path.join(self._root_path, self._relative_path)
         logger.debug(f"Update path {path}")
         buttons = []
-        asset_path = self._deck.asset_path
+
         menu = Menu(self._deck, back_icon_path="eject.png",
                 next_icon_path="next.png",
                 previous_icon_path="back.png",
@@ -128,11 +128,11 @@ class Navigator(FSMBase):
         menu.set_buttons(buttons)
         menu.run()
 
-    def _go_up(self, filename):
+    def _go_up(self, filename, **kwargs):
         logger.debug(f"Go up to folder {filename}")
         self._relative_path = os.path.join(self._relative_path, filename)
 
-    def _go_down(self):
+    def _go_down(self, **kwargs):
         self._relative_path = os.path.split(self._relative_path)[0]
         logger.debug(f"Go down to folder {self._relative_path}")
 
@@ -161,7 +161,7 @@ class Navigator(FSMBase):
             self._go_up(filename)
             self.press_folder()
         
-    def _reset_elements(self):
+    def _reset_elements(self, **kwargs):
         """
         Set black buttons in page
         """

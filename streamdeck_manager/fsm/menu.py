@@ -79,7 +79,7 @@ class Menu(FSMBase):
                                      callback = self.press_prev)
         )
 
-    def _next_page(self):
+    def _next_page(self, **kwargs):
         """
         Move to next page unless is the last one
         """
@@ -88,7 +88,7 @@ class Menu(FSMBase):
             return True
         return False
     
-    def _prev_page(self):
+    def _prev_page(self, **kwargs):
         """
         Move to previous page unless is the first one
         """
@@ -129,7 +129,7 @@ class Menu(FSMBase):
         self._current_page = 0
         self._buttons = buttons
 
-    def _update(self):
+    def _update(self, **kwargs):
         self._reset_elements()
         self._update_buttons()
         self._deck.render()

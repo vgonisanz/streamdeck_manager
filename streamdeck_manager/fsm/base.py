@@ -75,7 +75,7 @@ class FSMBase():
         self.run()
         self._lock.acquire(blocking=True)
 
-    def _release(self):
+    def _release(self, **kwargs):
         """
         If user use lock with wait function, call
         this method after enter in end state with
