@@ -7,7 +7,8 @@ from streamdeck_manager.fsm.navigator import Navigator
 
 def main(device_id: int=0,
          root_path: str=None,
-         asset_path: str=None):
+         asset_path: str=None,
+         font_path: str=None):
 
     core = Core()
 
@@ -15,7 +16,8 @@ def main(device_id: int=0,
         typer.echo("Not Stream deck found")
         raise typer.Exit(1)
 
-    deck = core.initialize_deck(device_id)
+    deck = core.initialize_deck(index=device_id, asset_path=asset_path, font=font_path)
+
     if not deck:
         raise typer.Exit(2)
 

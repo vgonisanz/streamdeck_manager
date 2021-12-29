@@ -12,11 +12,11 @@ from streamdeck_manager.core import Core
 from streamdeck_manager.entities import Button, Margin, Point2D
 
 
-def custom_callback():
+def custom_callback(**kwargs):
     print("middle callback called!")
 
 
-def end_sample_callback():
+def end_sample_callback(**kwargs):
     exit(0)
 
 

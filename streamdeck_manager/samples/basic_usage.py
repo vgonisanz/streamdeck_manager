@@ -13,11 +13,11 @@ from streamdeck_manager.core import Core
 from streamdeck_manager.entities import Button
 
 
-def custom_callback():
-    logging.info("callback called!")
+def custom_callback(**kwargs):
+    logging.info(f"callback called! {kwargs}")
 
 
-def end_sample_callback():
+def end_sample_callback(**kwargs):
     exit(0)
 
 

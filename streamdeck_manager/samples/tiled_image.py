@@ -4,7 +4,7 @@ import typer
 from streamdeck_manager.core import Core
 
 
-def end_sample_callback():
+def end_sample_callback(**kwargs):
     exit(0)
 
 
