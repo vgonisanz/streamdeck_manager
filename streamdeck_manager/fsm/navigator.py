@@ -34,11 +34,10 @@ class Navigator(FSMBase):
         self._root_path = root_path
         self._relative_path = ''
         self._menu = Menu(deck,
-                back_icon_path=os.path.join(deck.asset_path, "eject.png"),
-                next_icon_path=os.path.join(deck.asset_path, "next.png"),
-                previous_icon_path=os.path.join(deck.asset_path, "back.png"),
-                end_callback=self.press_back
-        )
+                back_icon_path="eject.png",
+                next_icon_path="next.png",
+                previous_icon_path="back.png",
+                end_callback=self.press_back)
         self._back_button_index = 0
         self._external_on_click_callback = None
 
@@ -112,9 +111,9 @@ class Navigator(FSMBase):
         logger.debug(f"Update path {path}")
         buttons = []
         asset_path = self._deck.asset_path
-        menu = Menu(self._deck, back_icon_path=os.path.join(asset_path, "eject.png"),
-                next_icon_path=os.path.join(asset_path, "next.png"),
-                previous_icon_path=os.path.join(asset_path, "back.png"),
+        menu = Menu(self._deck, back_icon_path="eject.png",
+                next_icon_path="next.png",
+                previous_icon_path="back.png",
                 end_callback=self.press_back
         )
         file_tuple = next(os.walk(path))
@@ -175,7 +174,7 @@ class Navigator(FSMBase):
     def _create_dir_button(self, dir):
         return Button(name=f"{dir}",
                       label=f"{dir}", label_pressed="go up",
-                      icon=os.path.join(self._deck.asset_path, "folder.png"),
+                      icon="folder.png",
                       label_pos=Point2D(x=self._deck.panel.image_size.width/2, y=self._deck.panel.image_size.height*2/3),
                       callback=self._on_click,
                       kwargs=dict(name=dir))
@@ -183,11 +182,14 @@ class Navigator(FSMBase):
     def _create_file_button(self, filename):
         ext = self._ext_from_file(filename)
         file_icon = f"{ext}.png"
+
         if ext == '':
             file_icon = f"bin.png"
-        file_icon_path = os.path.join(self._deck.asset_path, "files", file_icon)
-        if not os.path.isfile(file_icon_path):
+        file_icon_path = os.path.join("files", file_icon)
+
+        if not os.path.isfile(os.path.join(self._deck._asset_path, file_icon_path)):
             file_icon_path = self._use_default_icon(file_icon_path)
+
         return Button(name=f"{filename}",
                       label=f"{filename}", label_pressed="",
                       label_pos=Point2D(x=self._deck.panel.image_size.width/2, y=self._deck.panel.image_size.height - 5),
@@ -197,8 +199,8 @@ class Navigator(FSMBase):
                       kwargs=dict(name=filename))
     
     def _use_default_icon(self, file_icon_path):
-        if os.path.isfile(os.path.join(self._deck.asset_path, "files", f"bin.png")):
-            file_icon_path = os.path.join(self._deck.asset_path, "files", f"bin.png")
+        if os.path.isfile(os.path.join(self._deck._asset_path, "files", f"bin.png")):
+            file_icon_path = os.path.join("files", f"bin.png")
         else:
             file_icon_path = ""
         return file_icon_path

@@ -24,7 +24,7 @@ from StreamDeck.ImageHelpers import PILHelper
 from StreamDeck.Transport.Transport import TransportError
 
 # Folder location of image assets used by this example.
-ASSETS_PATH = os.path.join(os.path.dirname(__file__), "..", "assets")
+ASSETS_PATH = os.path.join(os.path.dirname(__file__), "..", "assets", "gif")
 
 # Animation frames per second to attempt to display on the StreamDeck devices.
 FRAMES_PER_SECOND = 30

@@ -94,10 +94,12 @@ class Deck():
         if icon == '':
             image = PILHelper.create_image(self._deck, background=button.background)
         else:
-            if not os.path.isfile(icon):
-                logger.warning(f"icon {icon} not found")
+            icon_path = os.path.join(self._asset_path, icon)
+
+            if not os.path.isfile(icon_path):
+                logger.warning(f"icon {icon_path} not found")
                 return
-            pre_image = Image.open(icon)
+            pre_image = Image.open(icon_path)
             margin = button.margin
             image = PILHelper.create_scaled_image(self._deck,
                         pre_image,
@@ -197,12 +199,16 @@ class Deck():
         """
         Set a image using all buttons and set up a callback. The image will be lost if
         use function render.
+
+        Parameters:
+            - photo_path: Absolute path to the image to use.
+            - callback: Function to call when a button is pushed.
         """
         # Approximate number of (non-visible) pixels between each key, so we can
         # take those into account when cutting up the image to show on the keys.
         key_spacing = (36, 36)
 
-        image = create_full_deck_sized_image(self._deck, key_spacing, os.path.join(self._asset_path, photo_path))
+        image = create_full_deck_sized_image(self._deck, key_spacing, photo_path)
 
         logging.info("Created full deck image size of {}x{} pixels.".format(image.width, image.height))
 

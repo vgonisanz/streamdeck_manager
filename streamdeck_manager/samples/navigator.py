@@ -6,19 +6,23 @@ from streamdeck_manager.fsm.navigator import Navigator
 
 
 def main(device_id: int=0,
-         root_path: str=os.path.join(os.path.dirname(__file__), "..", "assets"),
-         asset_path: str=os.path.join(os.path.dirname(__file__), "..", "assets")
-         ):
+         root_path: str=None,
+         asset_path: str=None):
+
     core = Core()
 
     if len(core.streamdecks) <= 0:
-        print("Not Stream deck found")
+        typer.echo("Not Stream deck found")
         raise typer.Exit(1)
 
-    deck = core.initialize_deck(device_id, asset_path=asset_path, font=os.path.join(asset_path, "Roboto-Regular.ttf"))
+    deck = core.initialize_deck(device_id)
     if not deck:
         raise typer.Exit(2)
 
+    if not root_path:
+        root_path = core.asset_path
+        typer.echo(f"Not root path provided, assigning default path: {root_path}")
+    
     navigator = Navigator(deck, root_path, None)
     navigator.wait()
 

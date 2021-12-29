@@ -4,11 +4,12 @@
 
 ### Added
 
-- ...
+- Core now can provide asset path and default font path.
 
 ### Changed
 
 - Navigator fsm now accept external callbacks to ease integrations.
+- deck render now append automatically configured asset path to avoid do it manually.
 
 ## 0.2.0 (2021-12-26)
 
