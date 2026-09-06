@@ -1,6 +1,7 @@
 # Streamdeck manager POC
 
 Library to manage elgato stream deck in a easy way with several use cases implemented.
+Moved to [Gitlab](https://gitlab.com/vgonisanz-portfolio/streamdeckmanager)
 
 This library have been tested with:
 
